@@ -83,8 +83,13 @@ Herramienta personal (NO se vende) para que el usuario lleve el control de sus i
 - Nueva pestaña "Metas" en Patrimonio (`SavingsGoals.tsx`), junto a Activos/Pasivos: barra de progreso por meta, check verde cuando se alcanza el 100%, botón "Agregar aporte" para sumar (o restar, con número negativo) sin editar la meta completa
 - Probado con datos reales: una meta parcial (40%) y una ya superada (100%+, check verde) — confirmado que el aporte persiste correctamente en la base de datos (usuario y datos de prueba borrados al terminar)
 
+## Exportar a Excel/CSV (a pedido del usuario, 2026-07-21)
+- Botón junto a "Registrar movimiento" en Movimientos (`ExportCsv.tsx` + `lib/csv.ts`), selector de rango de fechas (por defecto: desde el 1 del mes hasta hoy), descarga un CSV con Fecha/Tipo/Categoría/Monto/Nota
+- BOM UTF-8 (acentos correctos en Excel) + neutraliza inyección de fórmulas si una nota empieza con `= + - @`
+- Probado con datos reales inspeccionando los bytes crudos del archivo generado (confirmado BOM `EF BB BF`, acentos preservados, coma en nota escapada con comillas, intento de inyección `=cmd|calc` neutralizado) — usuario y datos de prueba borrados al terminar
+
 ## Próximas sesiones 📋
-- A futuro, si el usuario lo pide: filtros/paginación en Movimientos si la lista crece mucho, celebración visual al alcanzar hitos reales de patrimonio, exportar a Excel/CSV
+- A futuro, si el usuario lo pide: filtros/paginación en Movimientos si la lista crece mucho, celebración visual al alcanzar hitos reales de patrimonio
 - Advisor de seguridad (no bloqueante): Supabase sugiere activar "Leaked Password Protection" (revisa contraseñas contra HaveIBeenPwned) — toggle en el dashboard, pendiente de que el usuario decida si lo activa
 
 ## Problemas conocidos ⚠️
