@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+/* Newsreader — display, carácter editorial de atlas antiguo (solo subset latin) */
+@import "@fontsource/newsreader/latin-500.css";
+@import "@fontsource/newsreader/latin-600.css";
+@import "@fontsource/newsreader/latin-600-italic.css";
+
+/* Karla — cuerpo, humanista y cálida (solo subset latin) */
+@import "@fontsource/karla/latin-400.css";
+@import "@fontsource/karla/latin-500.css";
+@import "@fontsource/karla/latin-600.css";
+@import "@fontsource/karla/latin-700.css";
+
+/* IBM Plex Mono — cifras y metadatos, "lectura de instrumento" (solo subset latin) */
+@import "@fontsource/ibm-plex-mono/latin-400.css";
+@import "@fontsource/ibm-plex-mono/latin-500.css";
+@import "@fontsource/ibm-plex-mono/latin-600.css";
+
+:root {
+  color-scheme: light;
+
+  /* ====== SUPERFICIES — papel de mapa envejecido ====== */
+  --surface-base: #f6f1e4;
+  --surface-primary: #efe6d2;
+  --surface-secondary: #e8dcc4;
+  --surface-tertiary: #e2d4b8;
+  --surface-elevated: #fbf8f0;
+  --surface-overlay: rgba(43, 36, 23, 0.45);
+
+  /* ====== TEXTOS ====== */
+  --text-primary: #2b2417;
+  --text-secondary: #6b5d45;
+  --text-tertiary: #9c8f75;
+  --text-inverse: #f6f1e4;
+
+  /* ====== BORDES ====== */
+  --border-default: #ddceac;
+  --border-strong: #c4b088;
+
+  /* ====== MARCA ====== */
+  --brand-primary: #1f3a5f;
+  --brand-primary-hover: #16293f;
+  --brand-primary-soft: rgba(31, 58, 95, 0.1);
+  --brand-primary-text: #f6f1e4;
+
+  --brand-secondary: #b8863b;
+  --brand-secondary-soft: rgba(184, 134, 59, 0.12);
+
+  /* ====== ALIAS CORTOS ====== */
+  --bg: var(--surface-base);
+  --surface: var(--surface-primary);
+  --text: var(--text-primary);
+  --accent: var(--brand-primary);
+
+  /* ====== ESTADOS SEMÁNTICOS ====== */
+  --status-success: #3e7a54;
+  --status-success-soft: rgba(62, 122, 84, 0.12);
+  --status-error: #a8432e;
+  --status-error-soft: rgba(168, 67, 46, 0.1);
+  --status-warning: #c08a2e;
+  --status-warning-soft: rgba(192, 138, 46, 0.12);
+
+  /* ====== SOMBRAS ====== */
+  --shadow-sm: 0 1px 2px rgba(43, 36, 23, 0.08);
+  --shadow-md: 0 4px 10px -2px rgba(43, 36, 23, 0.12);
+  --shadow-lg: 0 12px 28px -8px rgba(43, 36, 23, 0.18);
+
+  /* ====== RADIOS — más rectos, tipo documento/mapa ====== */
+  --radius-control: 0.5rem;
+  --radius-card: 0.75rem;
+  --radius-full: 9999px;
+
+  /* ====== TIPOGRAFÍA ====== */
+  --font-display: "Newsreader", Georgia, serif;
+  --font-body: "Karla", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+@theme inline {
+  --color-surface-base: var(--surface-base);
+  --color-surface-primary: var(--surface-primary);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-surface-tertiary: var(--surface-tertiary);
+  --color-surface-elevated: var(--surface-elevated);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-inverse: var(--text-inverse);
+
+  --color-border-default: var(--border-default);
+  --color-border-strong: var(--border-strong);
+
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-primary-hover: var(--brand-primary-hover);
+  --color-brand-primary-soft: var(--brand-primary-soft);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-secondary-soft: var(--brand-secondary-soft);
+
+  --color-success: var(--status-success);
+  --color-success-soft: var(--status-success-soft);
+  --color-error: var(--status-error);
+  --color-error-soft: var(--status-error-soft);
+  --color-warning: var(--status-warning);
+  --color-warning-soft: var(--status-warning-soft);
+
+  --font-family-display: var(--font-display);
+  --font-family-body: var(--font-body);
+  --font-family-mono: var(--font-mono);
+
+  --radius-control: var(--radius-control);
+  --radius-card: var(--radius-card);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Textura de curvas de nivel, muy sutil — el "mundo del sujeto" cartográfico */
+.bg-topo {
+  background-color: var(--surface-base);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cg fill='none' stroke='%232B2417' stroke-opacity='0.05' stroke-width='1'%3E%3Cpath d='M-20 60 Q60 20 120 60 T260 60'/%3E%3Cpath d='M-20 110 Q60 70 120 110 T260 110'/%3E%3Cpath d='M-20 160 Q60 120 120 160 T260 160'/%3E%3Cpath d='M-20 210 Q60 170 120 210 T260 210'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 240px 240px;
+}
