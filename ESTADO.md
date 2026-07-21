@@ -1,5 +1,5 @@
 # ESTADO — Brújula
-Última actualización: 2026-07-21 | Sesión actual: 1
+Última actualización: 2026-07-21 | 🎉 App publicada y funcionando en https://ctaboadaa.github.io/Brujula/
 
 ## Qué es esta app (3 líneas máximo)
 Herramienta personal (NO se vende) para que el usuario lleve el control de sus ingresos y gastos, vea el balance de su patrimonio neto (activos - pasivos) y monitoree sus inversiones con precios de mercado actualizados automáticamente. Un solo usuario, uso privado.
@@ -29,13 +29,15 @@ Herramienta personal (NO se vende) para que el usuario lleve el control de sus i
 ## Decisiones técnicas (NO re-discutir sin pedirlo el usuario)
 - Framework: Vite + React + TypeScript + Tailwind v4 — herramienta interna sin SEO, sigue el patrón de CajaBella
 - Backend: Supabase (proyecto "Brujula", id `ucjuyujfwrapcojropzb`, org "The Owl Group") — Postgres real con RLS (a diferencia de CajaBella que usa Apps Script/Sheets) porque hay más cálculo financiero e historial
-- Hosting planeado: GitHub Pages (gratis), mismo patrón que CajaBella — **pendiente de confirmar y ejecutar con el usuario** (necesita su cuenta de GitHub)
+- Hosting: GitHub Pages (gratis), despliegue automático vía GitHub Actions (`.github/workflows/deploy.yml`) — publicada y verificada en https://ctaboadaa.github.io/Brujula/
+- Repo remoto: https://github.com/ctaboadaa/Brujula (rama `main`, deploy en cada push)
 - Single-user: solo el dueño usa la app, pero con RLS por `auth.uid()` en todas las tablas (buena práctica, deja la puerta abierta a futuro)
 - Moneda: Soles (PEN) únicamente. Las inversiones cotizan en USD y se convierten a PEN con el tipo de cambio real (ver abajo)
 - Idioma UI: español, mono-idioma
 - Nombre app: Brújula (confirmado)
 - Repo local: `C:\Users\charly\Documents\Projectos\Claude\LibertadFinanciera` (carpeta separada de App1/TuChamba y de CajaBella)
-- Dev server local: nombre `brujula-dev` en `App1/.claude/launch.json`, puerto 3002, base `/LibertadFinanciera/`
+- Dev server local: nombre `brujula-dev` en `App1/.claude/launch.json`, puerto 3002, base `/Brujula/` (coincide con el nombre del repo)
+- Las variables `VITE_SUPABASE_URL`/`VITE_SUPABASE_PUBLISHABLE_KEY` están hardcodeadas en `deploy.yml` (no son secretas — la clave "publishable" está diseñada para ser pública; la protección real es RLS en la base de datos)
 
 ## Método de autenticación (Sesión 1 — decidido)
 - Correo + contraseña vía Supabase Auth (elegido por el usuario, simple para uso personal)
@@ -56,19 +58,20 @@ Herramienta personal (NO se vende) para que el usuario lleve el control de sus i
 - Nota técnica: se intentó primero con Stooq (acciones) y Frankfurter (tipo de cambio) pero ambos fallaron desde el entorno (Stooq bloquea/cambió su endpoint CSV, Frankfurter con dominio incorrecto) — se resolvió migrando a Yahoo Finance + Binance, ambos verificados funcionando
 
 ## Sesiones completadas ✅
-- Sesión 1 — Completa de punta a punta: Supabase + esquema con RLS · auth funcionando · identidad visual (Explorador/cartografía) · las 4 pantallas (Resumen, Movimientos, Patrimonio, Inversiones) construidas y probadas contra el backend real · precios automáticos de inversiones funcionando · animaciones baseline (stagger, conteo animado, barras, tap feedback, bottom sheets) · `npm audit` 0 vulnerabilidades · 0 alertas de seguridad en Supabase advisors — 2026-07-21
+- Sesión 1 — Completa de punta a punta: Supabase + esquema con RLS · auth funcionando · identidad visual (Explorador/cartografía) · las 4 pantallas (Resumen, Movimientos, Patrimonio, Inversiones) construidas y probadas contra el backend real · precios automáticos de inversiones funcionando · animaciones baseline (stagger, conteo animado, barras, tap feedback, bottom sheets) · `npm audit` 0 vulnerabilidades · 0 alertas de seguridad en Supabase advisors · publicada en GitHub Pages con deploy automático — 2026-07-21
   - 🐛 Corregido durante pruebas: al crear una categoría nueva al vuelo en el formulario de movimientos, la transacción no quedaba vinculada a ella (`useCategories.addCategory` no devolvía el id creado) — corregido y verificado.
+  - 🐛 Corregido en el deploy: la Edge Function `get-prices` rechazaba el preflight CORS (OPTIONS) con 401 porque `verify_jwt` estaba en `true` a nivel de plataforma — se cambió a `false` y se agregó verificación manual del JWT dentro del código (misma seguridad, sin romper CORS).
 
 ## Próximas sesiones 📋
-- Deploy a GitHub Pages (necesita que el usuario cree/conecte el repo de GitHub — ver pendientes)
 - A futuro, si el usuario lo pide: gráfico de tendencia de patrimonio en el tiempo usando `net_worth_snapshots`, filtros/paginación en Movimientos si la lista crece mucho, celebración visual al alcanzar hitos reales de patrimonio
 
 ## Problemas conocidos ⚠️
 - Ninguno bloqueante. El chunk de JS de producción pesa ~640KB (185KB gzip) — aceptable para una app interna de un solo usuario; si se quiere optimizar después, dividir rutas con `React.lazy`.
 
 ## Pendientes del usuario (acciones que el usuario debe hacer)
-- [ ] Crear tu propia cuenta en la app (correo + contraseña) desde la pantalla de login — todavía no existe ninguna cuenta con tu correo real
-- [ ] Para publicar la app en internet (GitHub Pages, gratis): decirme si ya tienes cuenta de GitHub o prefieres que te guíe para crear una, y si quieres un repositorio nuevo para "Brújula"
+- [ ] Crear tu propia cuenta en la app (correo + contraseña) desde https://ctaboadaa.github.io/Brujula/ — todavía no existe ninguna cuenta con tu correo real
+- [x] Repo de GitHub creado y conectado (`ctaboadaa/Brujula`) ✅
+- [x] GitHub Pages publicado con deploy automático en cada push ✅
 
 ## Notas para la próxima sesión
 - El usuario no es técnico — explicar todo en simple, traducir jerga la primera vez.

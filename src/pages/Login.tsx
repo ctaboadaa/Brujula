@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { motion } from 'motion/react'
 import { useAuth } from '../hooks/useAuth'
 import CompassRose from '../components/CompassRose'
+import Owl from '../components/Owl'
 
 export default function Login() {
   const { signIn, signUp } = useAuth()
@@ -34,8 +35,10 @@ export default function Login() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
-        className="w-full max-w-sm rounded-card border border-border-default bg-surface-elevated p-8 shadow-lg"
+        className="relative w-full max-w-sm rounded-card border border-border-default bg-surface-elevated p-8 shadow-lg"
       >
+        <Owl className="pointer-events-none absolute bottom-4 right-4 h-6 w-6 text-text-tertiary/40" />
+
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
