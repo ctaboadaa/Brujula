@@ -88,6 +88,12 @@ Herramienta personal (NO se vende) para que el usuario lleve el control de sus i
 - BOM UTF-8 (acentos correctos en Excel) + neutraliza inyección de fórmulas si una nota empieza con `= + - @`
 - Probado con datos reales inspeccionando los bytes crudos del archivo generado (confirmado BOM `EF BB BF`, acentos preservados, coma en nota escapada con comillas, intento de inyección `=cmd|calc` neutralizado) — usuario y datos de prueba borrados al terminar
 
+## Recuperar/restablecer contraseña (a pedido del usuario, 2026-07-21)
+- Motivo: el usuario quedó bloqueado con "Credenciales inválidas" en su primer intento real de login — se le restableció la contraseña manualmente esa vez, y se construyó el flujo propio para que no dependa de que el agente lo haga a mano la próxima vez
+- Link "¿Olvidaste tu contraseña?" en Login → `requestPasswordReset` (Supabase `resetPasswordForEmail`, redirige a `/restablecer`)
+- Pantalla nueva `/restablecer` (`RestablecerContrasena.tsx`): si hay sesión de recuperación válida, formulario de contraseña nueva + confirmación (`updatePassword`); si el link es inválido/expiró, aviso en vez del formulario
+- Probado end-to-end contra el backend real: se cambió la contraseña de una cuenta de prueba y se confirmó por API que la nueva funciona y la vieja ya no (usuario y datos de prueba borrados al terminar)
+
 ## Próximas sesiones 📋
 - A futuro, si el usuario lo pide: filtros/paginación en Movimientos si la lista crece mucho, celebración visual al alcanzar hitos reales de patrimonio
 - Advisor de seguridad (no bloqueante): Supabase sugiere activar "Leaked Password Protection" (revisa contraseñas contra HaveIBeenPwned) — toggle en el dashboard, pendiente de que el usuario decida si lo activa
