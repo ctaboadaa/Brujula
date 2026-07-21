@@ -6,6 +6,7 @@ import { useCategories } from '../hooks/useCategories'
 import BottomSheet from '../components/BottomSheet'
 import EmptyState from '../components/EmptyState'
 import BudgetOverview from '../components/BudgetOverview'
+import ExportCsv from '../components/ExportCsv'
 import { formatCurrency, formatDate, todayIsoDate } from '../lib/format'
 import type { CategoryType } from '../lib/types'
 
@@ -92,15 +93,18 @@ export default function Transacciones() {
     <div className="mx-auto max-w-md px-4 pt-8">
       <div className="mb-5 flex items-center justify-between">
         <h1 className="font-display text-2xl font-medium text-text-primary">Movimientos</h1>
-        <motion.button
-          whileTap={{ scale: 0.94 }}
-          type="button"
-          onClick={openSheet}
-          aria-label="Registrar movimiento"
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-primary text-text-inverse shadow-md"
-        >
-          <Plus size={22} weight="bold" />
-        </motion.button>
+        <div className="flex items-center gap-2">
+          <ExportCsv transactions={transactions} categories={categories} />
+          <motion.button
+            whileTap={{ scale: 0.94 }}
+            type="button"
+            onClick={openSheet}
+            aria-label="Registrar movimiento"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-primary text-text-inverse shadow-md"
+          >
+            <Plus size={22} weight="bold" />
+          </motion.button>
+        </div>
       </div>
 
       <div className="mb-5 flex gap-2">
