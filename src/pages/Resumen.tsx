@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'motion/react'
 import { Link } from 'react-router-dom'
-import { Gear, TrendUp, TrendDown, ArrowsLeftRight } from '@phosphor-icons/react'
+import { Gear, ArrowsLeftRight } from '@phosphor-icons/react'
 import { useAssets } from '../hooks/useAssets'
 import { useLiabilities } from '../hooks/useLiabilities'
 import { useInvestments } from '../hooks/useInvestments'
@@ -13,6 +13,7 @@ import { useAuth } from '../hooks/useAuth'
 import BottomSheet from '../components/BottomSheet'
 import EmptyState from '../components/EmptyState'
 import NetWorthTrend from '../components/NetWorthTrend'
+import CashflowTrend from '../components/CashflowTrend'
 import { formatCurrency, formatDate } from '../lib/format'
 
 export default function Resumen() {
@@ -36,13 +37,6 @@ export default function Resumen() {
     recordSnapshot({ totalAssets, totalInvestments, totalLiabilities })
   }, [loadingAssets, loadingLiabilities, totalAssets, totalInvestments, totalLiabilities, recordSnapshot])
 
-  const now = new Date()
-  const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-  const monthTransactions = transactions.filter((t) => t.date.startsWith(monthKey))
-  const monthIncome = monthTransactions.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0)
-  const monthExpense = monthTransactions.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
-  const maxBar = Math.max(monthIncome, monthExpense, 1)
-
   const recent = useMemo(() => transactions.slice(0, 4), [transactions])
 
   function categoryName(id: string | null) {
@@ -51,7 +45,6 @@ export default function Resumen() {
   }
 
   const loading = loadingAssets || loadingLiabilities || loadingTransactions
-  const monthLabel = now.toLocaleDateString('es-PE', { month: 'long', year: 'numeric' })
 
   return (
     <div className="mx-auto max-w-md px-4 pt-8">
@@ -92,39 +85,7 @@ export default function Resumen() {
         <NetWorthTrend snapshots={snapshots} />
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.05, ease: 'easeOut' }}
-        className="mb-6 rounded-card border border-border-default bg-surface-elevated p-5 shadow-sm"
-      >
-        <p className="mb-3 text-xs uppercase tracking-wide text-text-tertiary capitalize">{monthLabel}</p>
-        <div className="mb-3 flex justify-between text-sm">
-          <span className="flex items-center gap-1 text-success">
-            <TrendUp size={16} weight="bold" /> Ingresos {formatCurrency(monthIncome)}
-          </span>
-          <span className="flex items-center gap-1 text-error">
-            <TrendDown size={16} weight="bold" /> Gastos {formatCurrency(monthExpense)}
-          </span>
-        </div>
-        <div className="flex h-2 w-full overflow-hidden rounded-full bg-surface-secondary">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${(monthIncome / maxBar) * 50}%` }}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
-            className="bg-success"
-          />
-          <div className="flex-1" />
-        </div>
-        <div className="mt-1 flex h-2 w-full overflow-hidden rounded-full bg-surface-secondary">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${(monthExpense / maxBar) * 100}%` }}
-            transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
-            className="bg-error"
-          />
-        </div>
-      </motion.div>
+      <CashflowTrend transactions={transactions} />
 
       <div className="mb-3 flex items-center justify-between">
         <h2 className="font-display text-lg font-medium text-text-primary">Últimos movimientos</h2>
