@@ -66,6 +66,12 @@ Herramienta personal (NO se vende) para que el usuario lleve el control de sus i
 - Gráfico de tendencia de patrimonio neto — a pedido del usuario, 2026-07-21: card "Tendencia de tu patrimonio" en Resumen (`NetWorthTrend.tsx`, Recharts). `useNetWorthHistory` registra una foto diaria en `net_worth_snapshots` (upsert por fecha) cada vez que se abre Resumen.
 - Ajuste de granularidad de los gráficos — a pedido del usuario, 2026-07-21: el patrimonio no cambia drásticamente día a día, así que `NetWorthTrend` pasó de pestañas "7 días/6 meses" a **"12 meses/Años"** (agrega las fotos diarias por mes/año, tomando el último valor de cada período). Se creó `CashflowTrend.tsx` (barras ingresos vs. gastos) con pestañas **"Este mes" (por semana, últimas 5 semanas) / "12 meses"**, que reemplazó la card estática de ingresos/gastos del mes actual en Resumen. Ambos gráficos: tabla accesible oculta (`sr-only`), estado "aún no hay historial suficiente" cuando corresponde, helpers de agregación por fecha en `lib/timeBuckets.ts`. Probado con datos históricos de varios meses insertados por SQL (usuario y datos de prueba borrados al terminar).
 
+## Tu número de libertad financiera (a pedido del usuario, 2026-07-21)
+- Card `FreedomNumber.tsx` en Resumen: patrimonio objetivo = gasto anual × 25 (regla del 4% / retiro seguro)
+- Gasto anual: por defecto se calcula del promedio de gastos de los últimos 3 meses activos; el usuario puede personalizarlo (ícono de lápiz) si su estilo de vida objetivo es distinto al actual — se guarda en la tabla nueva `user_settings` (RLS por `auth.uid()`)
+- Muestra % de progreso (patrimonio actual / número objetivo) y años estimados para llegar según el ahorro mensual promedio (ingreso - gasto de los últimos 3 meses); si no hay ahorro mensual positivo, muestra un aviso en vez de un número sin sentido
+- Probado con datos reales insertados por SQL: verificado que el cálculo automático y la personalización manual dan el resultado matemático correcto (usuario y datos de prueba borrados al terminar)
+
 ## Próximas sesiones 📋
 - A futuro, si el usuario lo pide: filtros/paginación en Movimientos si la lista crece mucho, celebración visual al alcanzar hitos reales de patrimonio
 - Advisor de seguridad (no bloqueante): Supabase sugiere activar "Leaked Password Protection" (revisa contraseñas contra HaveIBeenPwned) — toggle en el dashboard, pendiente de que el usuario decida si lo activa
