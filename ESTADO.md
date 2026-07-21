@@ -94,6 +94,11 @@ Herramienta personal (NO se vende) para que el usuario lleve el control de sus i
 - Pantalla nueva `/restablecer` (`RestablecerContrasena.tsx`): si hay sesión de recuperación válida, formulario de contraseña nueva + confirmación (`updatePassword`); si el link es inválido/expiró, aviso en vez del formulario
 - Probado end-to-end contra el backend real: se cambió la contraseña de una cuenta de prueba y se confirmó por API que la nueva funciona y la vieja ya no (usuario y datos de prueba borrados al terminar)
 
+## Editar activos y pasivos (a pedido del usuario, 2026-07-21)
+- Motivo: el saldo de una cuenta o el monto de una tarjeta cambia con el tiempo, no es un valor fijo que solo se registra una vez
+- Ícono de lápiz en cada fila de Activos/Pasivos (Patrimonio) que abre la misma sheet de crear, precargada, y guarda con `updateAsset`/`updateLiability` (funciones que ya existían en los hooks pero no estaban conectadas a ninguna pantalla) en vez de crear un registro nuevo
+- Probado con datos reales: editar un activo y un pasivo existentes y confirmar por SQL que el valor se actualizó (no se creó un duplicado) — usuario y datos de prueba borrados al terminar
+
 ## Próximas sesiones 📋
 - A futuro, si el usuario lo pide: filtros/paginación en Movimientos si la lista crece mucho, celebración visual al alcanzar hitos reales de patrimonio
 - Advisor de seguridad (no bloqueante): Supabase sugiere activar "Leaked Password Protection" (revisa contraseñas contra HaveIBeenPwned) — toggle en el dashboard, pendiente de que el usuario decida si lo activa
