@@ -29,6 +29,11 @@ jobs:
           node-version: 20
       - run: npm ci
       - run: npm run build
+      # GitHub Pages es un host de archivos estáticos: no sabe de las rutas internas
+      # de React Router. Al recargar una pantalla (ej. /transacciones) buscaría un
+      # archivo que no existe y devolvería 404. Copiar index.html como 404.html hace
+      # que GitHub Pages sirva la app igual, y React Router toma la ruta correcta.
+      - run: cp dist/index.html dist/404.html
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
