@@ -6,6 +6,7 @@ export interface Category {
   name: string
   type: CategoryType
   icon: string | null
+  monthly_budget: number | null
   created_at: string
 }
 

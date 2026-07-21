@@ -5,6 +5,7 @@ import { useTransactions } from '../hooks/useTransactions'
 import { useCategories } from '../hooks/useCategories'
 import BottomSheet from '../components/BottomSheet'
 import EmptyState from '../components/EmptyState'
+import BudgetOverview from '../components/BudgetOverview'
 import { formatCurrency, formatDate, todayIsoDate } from '../lib/format'
 import type { CategoryType } from '../lib/types'
 
@@ -118,6 +119,8 @@ export default function Transacciones() {
           </button>
         ))}
       </div>
+
+      <BudgetOverview categories={categories} transactions={transactions} />
 
       {loading && <p className="py-8 text-center text-text-secondary">Cargando…</p>}
       {error && <p className="py-4 text-center text-error">{error}</p>}

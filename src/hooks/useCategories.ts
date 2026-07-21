@@ -40,5 +40,12 @@ export function useCategories() {
     return { error: null }
   }
 
-  return { categories, loading, error, addCategory, removeCategory, refetch }
+  async function setCategoryBudget(id: string, monthlyBudget: number | null) {
+    const { error } = await supabase.from('categories').update({ monthly_budget: monthlyBudget }).eq('id', id)
+    if (error) return { error: 'No pudimos guardar el presupuesto.' }
+    await refetch()
+    return { error: null }
+  }
+
+  return { categories, loading, error, addCategory, removeCategory, setCategoryBudget, refetch }
 }
