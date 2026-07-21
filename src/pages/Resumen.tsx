@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'motion/react'
 import { Link } from 'react-router-dom'
 import { Gear, TrendUp, TrendDown, ArrowsLeftRight } from '@phosphor-icons/react'
@@ -8,9 +8,11 @@ import { useInvestments } from '../hooks/useInvestments'
 import { useTransactions } from '../hooks/useTransactions'
 import { useCategories } from '../hooks/useCategories'
 import { useCountUp } from '../hooks/useCountUp'
+import { useNetWorthHistory } from '../hooks/useNetWorthHistory'
 import { useAuth } from '../hooks/useAuth'
 import BottomSheet from '../components/BottomSheet'
 import EmptyState from '../components/EmptyState'
+import NetWorthTrend from '../components/NetWorthTrend'
 import { formatCurrency, formatDate } from '../lib/format'
 
 export default function Resumen() {
@@ -22,10 +24,17 @@ export default function Resumen() {
   const { categories } = useCategories()
   const [settingsOpen, setSettingsOpen] = useState(false)
 
+  const { snapshots, recordSnapshot } = useNetWorthHistory()
+
   const totalAssets = assets.reduce((sum, a) => sum + a.value, 0)
   const totalLiabilities = liabilities.reduce((sum, l) => sum + l.amount, 0)
   const totalInvestments = investments.reduce((sum, i) => sum + i.currentValuePen, 0)
   const netWorth = useCountUp(totalAssets + totalInvestments - totalLiabilities)
+
+  useEffect(() => {
+    if (loadingAssets || loadingLiabilities) return
+    recordSnapshot({ totalAssets, totalInvestments, totalLiabilities })
+  }, [loadingAssets, loadingLiabilities, totalAssets, totalInvestments, totalLiabilities, recordSnapshot])
 
   const now = new Date()
   const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
@@ -78,6 +87,10 @@ export default function Resumen() {
           Ver el detalle de activos y pasivos →
         </Link>
       </motion.div>
+
+      <div className="mb-6">
+        <NetWorthTrend snapshots={snapshots} />
+      </div>
 
       <motion.div
         initial={{ opacity: 0, y: 10 }}

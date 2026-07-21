@@ -61,6 +61,8 @@ Herramienta personal (NO se vende) para que el usuario lleve el control de sus i
 - Sesión 1 — Completa de punta a punta: Supabase + esquema con RLS · auth funcionando · identidad visual (Explorador/cartografía) · las 4 pantallas (Resumen, Movimientos, Patrimonio, Inversiones) construidas y probadas contra el backend real · precios automáticos de inversiones funcionando · animaciones baseline (stagger, conteo animado, barras, tap feedback, bottom sheets) · `npm audit` 0 vulnerabilidades · 0 alertas de seguridad en Supabase advisors · publicada en GitHub Pages con deploy automático — 2026-07-21
   - 🐛 Corregido durante pruebas: al crear una categoría nueva al vuelo en el formulario de movimientos, la transacción no quedaba vinculada a ella (`useCategories.addCategory` no devolvía el id creado) — corregido y verificado.
   - 🐛 Corregido en el deploy: la Edge Function `get-prices` rechazaba el preflight CORS (OPTIONS) con 401 porque `verify_jwt` estaba en `true` a nivel de plataforma — se cambió a `false` y se agregó verificación manual del JWT dentro del código (misma seguridad, sin romper CORS).
+  - 🐛 Corregido tras el primer registro real del usuario: (1) el link de confirmación de correo apuntaba a `localhost:3000` en vez de a la app publicada — el usuario ajustó "Site URL"/"Redirect URLs" en el dashboard de Supabase (Authentication → URL Configuration) a `https://ctaboadaa.github.io/Brujula/`; (2) recargar una ruta interna (ej. `/transacciones`) daba 404 en GitHub Pages — se agregó `cp dist/index.html dist/404.html` en `deploy.yml` (GitHub Pages no conoce las rutas de React Router; servir el mismo `index.html` como 404 hace que la app cargue y React Router resuelva la ruta correcta).
+  - 🎨 A pedido del usuario: se agregó un búho pequeño y sutil (`Owl.tsx`, mismo estilo de línea que la brújula) en la esquina de la tarjeta de login.
 
 ## Próximas sesiones 📋
 - A futuro, si el usuario lo pide: gráfico de tendencia de patrimonio en el tiempo usando `net_worth_snapshots`, filtros/paginación en Movimientos si la lista crece mucho, celebración visual al alcanzar hitos reales de patrimonio
@@ -69,9 +71,10 @@ Herramienta personal (NO se vende) para que el usuario lleve el control de sus i
 - Ninguno bloqueante. El chunk de JS de producción pesa ~640KB (185KB gzip) — aceptable para una app interna de un solo usuario; si se quiere optimizar después, dividir rutas con `React.lazy`.
 
 ## Pendientes del usuario (acciones que el usuario debe hacer)
-- [ ] Crear tu propia cuenta en la app (correo + contraseña) desde https://ctaboadaa.github.io/Brujula/ — todavía no existe ninguna cuenta con tu correo real
 - [x] Repo de GitHub creado y conectado (`ctaboadaa/Brujula`) ✅
 - [x] GitHub Pages publicado con deploy automático en cada push ✅
+- [x] Cuenta real creada y confirmada (`ctaboadaa@gmail.com`) ✅
+- [x] "Site URL"/"Redirect URLs" corregidas en el dashboard de Supabase a `https://ctaboadaa.github.io/Brujula/` ✅
 
 ## Notas para la próxima sesión
 - El usuario no es técnico — explicar todo en simple, traducir jerga la primera vez.
