@@ -5,13 +5,14 @@ import CompassRose from '../components/CompassRose'
 import Owl from '../components/Owl'
 
 export default function Login() {
-  const { signIn, signUp } = useAuth()
+  const { signIn, signUp, requestPasswordReset } = useAuth()
   const [mode, setMode] = useState<'signIn' | 'signUp'>('signIn')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [info, setInfo] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [resetting, setResetting] = useState(false)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -27,6 +28,23 @@ export default function Login() {
     if (mode === 'signUp') {
       setInfo('Revisa tu correo para confirmar tu cuenta.')
     }
+  }
+
+  async function handleForgotPassword() {
+    setError(null)
+    setInfo(null)
+    if (!email.trim()) {
+      setError('Escribe tu correo arriba y toca de nuevo "¿Olvidaste tu contraseña?".')
+      return
+    }
+    setResetting(true)
+    const result = await requestPasswordReset(email.trim())
+    setResetting(false)
+    if (result.error) {
+      setError(result.error)
+      return
+    }
+    setInfo('Si ese correo tiene una cuenta, te enviamos un link para restablecer tu contraseña.')
   }
 
   return (
@@ -93,6 +111,17 @@ export default function Login() {
               className="w-full rounded-control border border-border-default bg-surface-secondary px-3 py-2.5 text-text-primary outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
             />
           </motion.div>
+
+          {mode === 'signIn' && (
+            <button
+              type="button"
+              onClick={handleForgotPassword}
+              disabled={resetting}
+              className="-mt-2 block text-xs text-text-secondary underline underline-offset-4 hover:text-text-primary disabled:opacity-50"
+            >
+              {resetting ? 'Enviando…' : '¿Olvidaste tu contraseña?'}
+            </button>
+          )}
 
           {error && (
             <p role="alert" className="text-sm text-error">

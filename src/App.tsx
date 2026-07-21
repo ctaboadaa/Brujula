@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { AuthProvider, useAuth } from './hooks/useAuth'
 import AppShell from './components/AppShell'
 import Login from './pages/Login'
+import RestablecerContrasena from './pages/RestablecerContrasena'
 import Resumen from './pages/Resumen'
 import Transacciones from './pages/Transacciones'
 import Patrimonio from './pages/Patrimonio'
@@ -28,6 +29,7 @@ function AppRoutes() {
         path="/login"
         element={loading ? <FullScreenLoader /> : session ? <Navigate to="/resumen" replace /> : <Login />}
       />
+      <Route path="/restablecer" element={loading ? <FullScreenLoader /> : <RestablecerContrasena />} />
       <Route
         path="/resumen"
         element={
