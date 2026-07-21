@@ -6,6 +6,7 @@ import { useLiabilities } from '../hooks/useLiabilities'
 import { useCountUp } from '../hooks/useCountUp'
 import BottomSheet from '../components/BottomSheet'
 import EmptyState from '../components/EmptyState'
+import SavingsGoals from '../components/SavingsGoals'
 import { formatCurrency } from '../lib/format'
 import {
   ASSET_TYPE_LABELS,
@@ -14,7 +15,7 @@ import {
   type LiabilityType,
 } from '../lib/types'
 
-type Tab = 'assets' | 'liabilities'
+type Tab = 'assets' | 'liabilities' | 'goals'
 
 export default function Patrimonio() {
   const { assets, loading: loadingAssets, addAsset, removeAsset } = useAssets()
@@ -90,7 +91,7 @@ export default function Patrimonio() {
 
       <div className="mb-5 flex items-center justify-between">
         <div className="flex gap-2">
-          {(['assets', 'liabilities'] as Tab[]).map((t) => (
+          {(['assets', 'liabilities', 'goals'] as Tab[]).map((t) => (
             <button
               key={t}
               type="button"
@@ -101,21 +102,27 @@ export default function Patrimonio() {
                   : 'border border-border-default bg-surface-elevated text-text-secondary'
               }`}
             >
-              {t === 'assets' ? 'Activos' : 'Pasivos'}
+              {t === 'assets' ? 'Activos' : t === 'liabilities' ? 'Pasivos' : 'Metas'}
             </button>
           ))}
         </div>
-        <motion.button
-          whileTap={{ scale: 0.94 }}
-          type="button"
-          onClick={openSheet}
-          aria-label={tab === 'assets' ? 'Agregar activo' : 'Agregar pasivo'}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-primary text-text-inverse shadow-md"
-        >
-          <Plus size={22} weight="bold" />
-        </motion.button>
+        {tab !== 'goals' && (
+          <motion.button
+            whileTap={{ scale: 0.94 }}
+            type="button"
+            onClick={openSheet}
+            aria-label={tab === 'assets' ? 'Agregar activo' : 'Agregar pasivo'}
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-primary text-text-inverse shadow-md"
+          >
+            <Plus size={22} weight="bold" />
+          </motion.button>
+        )}
       </div>
 
+      {tab === 'goals' && <SavingsGoals />}
+
+      {tab !== 'goals' && (
+        <>
       {loading && <p className="py-8 text-center text-text-secondary">Cargando…</p>}
 
       {!loading && tab === 'assets' && assets.length === 0 && (
@@ -190,6 +197,8 @@ export default function Patrimonio() {
               </motion.li>
             ))}
       </ul>
+        </>
+      )}
 
       <BottomSheet
         open={sheetOpen}
