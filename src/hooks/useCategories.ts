@@ -47,5 +47,12 @@ export function useCategories() {
     return { error: null }
   }
 
-  return { categories, loading, error, addCategory, removeCategory, setCategoryBudget, refetch }
+  async function renameCategory(id: string, name: string) {
+    const { error } = await supabase.from('categories').update({ name }).eq('id', id)
+    if (error) return { error: 'No pudimos renombrar la categoría.' }
+    await refetch()
+    return { error: null }
+  }
+
+  return { categories, loading, error, addCategory, removeCategory, setCategoryBudget, renameCategory, refetch }
 }

@@ -7,6 +7,7 @@ import BottomSheet from '../components/BottomSheet'
 import EmptyState from '../components/EmptyState'
 import BudgetOverview from '../components/BudgetOverview'
 import ExportCsv from '../components/ExportCsv'
+import CategoryManager from '../components/CategoryManager'
 import { formatCurrency, formatDate, todayIsoDate } from '../lib/format'
 import type { CategoryType } from '../lib/types'
 
@@ -94,6 +95,7 @@ export default function Transacciones() {
       <div className="mb-5 flex items-center justify-between">
         <h1 className="font-display text-2xl font-medium text-text-primary">Movimientos</h1>
         <div className="flex items-center gap-2">
+          <CategoryManager categories={categories} />
           <ExportCsv transactions={transactions} categories={categories} />
           <motion.button
             whileTap={{ scale: 0.94 }}
