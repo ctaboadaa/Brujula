@@ -78,8 +78,13 @@ Herramienta personal (NO se vende) para que el usuario lleve el control de sus i
 - Sheet "Configurar presupuestos" para poner/editar el límite mensual de cada categoría de gasto (input + botón guardar por fila)
 - Probado con datos reales insertados por SQL (3 categorías con distintos niveles de gasto vs. límite) — confirmado que el cálculo, el orden y el guardado persisten correctamente (usuario y datos de prueba borrados al terminar)
 
+## Metas de ahorro (a pedido del usuario, 2026-07-21)
+- Tabla `savings_goals` (nombre, monto objetivo, monto actual, fecha objetivo opcional; RLS por `auth.uid()`)
+- Nueva pestaña "Metas" en Patrimonio (`SavingsGoals.tsx`), junto a Activos/Pasivos: barra de progreso por meta, check verde cuando se alcanza el 100%, botón "Agregar aporte" para sumar (o restar, con número negativo) sin editar la meta completa
+- Probado con datos reales: una meta parcial (40%) y una ya superada (100%+, check verde) — confirmado que el aporte persiste correctamente en la base de datos (usuario y datos de prueba borrados al terminar)
+
 ## Próximas sesiones 📋
-- A futuro, si el usuario lo pide: filtros/paginación en Movimientos si la lista crece mucho, celebración visual al alcanzar hitos reales de patrimonio, metas de ahorro, exportar a Excel/CSV
+- A futuro, si el usuario lo pide: filtros/paginación en Movimientos si la lista crece mucho, celebración visual al alcanzar hitos reales de patrimonio, exportar a Excel/CSV
 - Advisor de seguridad (no bloqueante): Supabase sugiere activar "Leaked Password Protection" (revisa contraseñas contra HaveIBeenPwned) — toggle en el dashboard, pendiente de que el usuario decida si lo activa
 
 ## Problemas conocidos ⚠️
