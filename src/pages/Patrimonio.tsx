@@ -1,8 +1,9 @@
 import { useState, type FormEvent } from 'react'
 import { motion } from 'motion/react'
-import { Plus, Vault, Trash } from '@phosphor-icons/react'
+import { Plus, Vault, Trash, PencilSimple } from '@phosphor-icons/react'
 import { useAssets } from '../hooks/useAssets'
 import { useLiabilities } from '../hooks/useLiabilities'
+import type { Asset, Liability } from '../lib/types'
 import { useCountUp } from '../hooks/useCountUp'
 import BottomSheet from '../components/BottomSheet'
 import EmptyState from '../components/EmptyState'
@@ -18,10 +19,11 @@ import {
 type Tab = 'assets' | 'liabilities' | 'goals'
 
 export default function Patrimonio() {
-  const { assets, loading: loadingAssets, addAsset, removeAsset } = useAssets()
-  const { liabilities, loading: loadingLiabilities, addLiability, removeLiability } = useLiabilities()
+  const { assets, loading: loadingAssets, addAsset, updateAsset, removeAsset } = useAssets()
+  const { liabilities, loading: loadingLiabilities, addLiability, updateLiability, removeLiability } = useLiabilities()
   const [tab, setTab] = useState<Tab>('assets')
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
 
   const [name, setName] = useState('')
   const [assetType, setAssetType] = useState<AssetType>('bank_account')
@@ -35,8 +37,29 @@ export default function Patrimonio() {
   const netWorth = useCountUp(totalAssets - totalLiabilities)
 
   function openSheet() {
+    setEditingId(null)
     setName('')
+    setAssetType('bank_account')
+    setLiabilityType('credit_card')
     setValue('')
+    setFormError(null)
+    setSheetOpen(true)
+  }
+
+  function openEditAsset(asset: Asset) {
+    setEditingId(asset.id)
+    setName(asset.name)
+    setAssetType(asset.type)
+    setValue(String(asset.value))
+    setFormError(null)
+    setSheetOpen(true)
+  }
+
+  function openEditLiability(liability: Liability) {
+    setEditingId(liability.id)
+    setName(liability.name)
+    setLiabilityType(liability.type)
+    setValue(String(liability.amount))
     setFormError(null)
     setSheetOpen(true)
   }
@@ -54,8 +77,11 @@ export default function Patrimonio() {
       return
     }
     setSubmitting(true)
-    const result =
-      tab === 'assets'
+    const result = editingId
+      ? tab === 'assets'
+        ? await updateAsset(editingId, { name: name.trim(), type: assetType, value: parsedValue })
+        : await updateLiability(editingId, { name: name.trim(), type: liabilityType, amount: parsedValue })
+      : tab === 'assets'
         ? await addAsset({ name: name.trim(), type: assetType, value: parsedValue })
         : await addLiability({ name: name.trim(), type: liabilityType, amount: parsedValue })
     setSubmitting(false)
@@ -158,8 +184,16 @@ export default function Patrimonio() {
                   <p className="text-sm font-medium text-text-primary">{a.name}</p>
                   <p className="text-xs text-text-secondary">{ASSET_TYPE_LABELS[a.type]}</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <span className="font-mono text-sm font-medium text-success">{formatCurrency(a.value)}</span>
+                  <button
+                    type="button"
+                    onClick={() => openEditAsset(a)}
+                    aria-label={`Editar ${a.name}`}
+                    className="text-text-tertiary hover:text-brand-primary"
+                  >
+                    <PencilSimple size={16} />
+                  </button>
                   <button
                     type="button"
                     onClick={() => removeAsset(a.id)}
@@ -183,8 +217,16 @@ export default function Patrimonio() {
                   <p className="text-sm font-medium text-text-primary">{l.name}</p>
                   <p className="text-xs text-text-secondary">{LIABILITY_TYPE_LABELS[l.type]}</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <span className="font-mono text-sm font-medium text-error">{formatCurrency(l.amount)}</span>
+                  <button
+                    type="button"
+                    onClick={() => openEditLiability(l)}
+                    aria-label={`Editar ${l.name}`}
+                    className="text-text-tertiary hover:text-brand-primary"
+                  >
+                    <PencilSimple size={16} />
+                  </button>
                   <button
                     type="button"
                     onClick={() => removeLiability(l.id)}
@@ -203,7 +245,15 @@ export default function Patrimonio() {
       <BottomSheet
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
-        title={tab === 'assets' ? 'Agregar activo' : 'Agregar pasivo'}
+        title={
+          editingId
+            ? tab === 'assets'
+              ? 'Editar activo'
+              : 'Editar pasivo'
+            : tab === 'assets'
+              ? 'Agregar activo'
+              : 'Agregar pasivo'
+        }
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
