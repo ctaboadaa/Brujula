@@ -14,6 +14,7 @@ import BottomSheet from '../components/BottomSheet'
 import EmptyState from '../components/EmptyState'
 import NetWorthTrend from '../components/NetWorthTrend'
 import CashflowTrend from '../components/CashflowTrend'
+import FreedomNumber from '../components/FreedomNumber'
 import { formatCurrency, formatDate } from '../lib/format'
 
 export default function Resumen() {
@@ -30,7 +31,8 @@ export default function Resumen() {
   const totalAssets = assets.reduce((sum, a) => sum + a.value, 0)
   const totalLiabilities = liabilities.reduce((sum, l) => sum + l.amount, 0)
   const totalInvestments = investments.reduce((sum, i) => sum + i.currentValuePen, 0)
-  const netWorth = useCountUp(totalAssets + totalInvestments - totalLiabilities)
+  const currentNetWorth = totalAssets + totalInvestments - totalLiabilities
+  const netWorth = useCountUp(currentNetWorth)
 
   useEffect(() => {
     if (loadingAssets || loadingLiabilities) return
@@ -80,6 +82,8 @@ export default function Resumen() {
           Ver el detalle de activos y pasivos →
         </Link>
       </motion.div>
+
+      <FreedomNumber transactions={transactions} currentNetWorth={currentNetWorth} />
 
       <div className="mb-6">
         <NetWorthTrend snapshots={snapshots} />
