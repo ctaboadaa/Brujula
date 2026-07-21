@@ -72,8 +72,14 @@ Herramienta personal (NO se vende) para que el usuario lleve el control de sus i
 - Muestra % de progreso (patrimonio actual / número objetivo) y años estimados para llegar según el ahorro mensual promedio (ingreso - gasto de los últimos 3 meses); si no hay ahorro mensual positivo, muestra un aviso en vez de un número sin sentido
 - Probado con datos reales insertados por SQL: verificado que el cálculo automático y la personalización manual dan el resultado matemático correcto (usuario y datos de prueba borrados al terminar)
 
+## Presupuestos por categoría (a pedido del usuario, 2026-07-21)
+- Columna `monthly_budget` en `categories` (nullable, solo aplica a categorías de gasto)
+- Card `BudgetOverview.tsx` en Movimientos: progreso del mes por categoría con límite configurado, barra de color (verde <70%, ámbar 70-99%, rojo ≥100%), ordenado por la más urgente primero. Aviso de texto cuando ya se pasó el límite.
+- Sheet "Configurar presupuestos" para poner/editar el límite mensual de cada categoría de gasto (input + botón guardar por fila)
+- Probado con datos reales insertados por SQL (3 categorías con distintos niveles de gasto vs. límite) — confirmado que el cálculo, el orden y el guardado persisten correctamente (usuario y datos de prueba borrados al terminar)
+
 ## Próximas sesiones 📋
-- A futuro, si el usuario lo pide: filtros/paginación en Movimientos si la lista crece mucho, celebración visual al alcanzar hitos reales de patrimonio
+- A futuro, si el usuario lo pide: filtros/paginación en Movimientos si la lista crece mucho, celebración visual al alcanzar hitos reales de patrimonio, metas de ahorro, exportar a Excel/CSV
 - Advisor de seguridad (no bloqueante): Supabase sugiere activar "Leaked Password Protection" (revisa contraseñas contra HaveIBeenPwned) — toggle en el dashboard, pendiente de que el usuario decida si lo activa
 
 ## Problemas conocidos ⚠️
