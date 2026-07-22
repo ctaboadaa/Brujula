@@ -93,8 +93,8 @@ export default function CashflowTrend({ transactions }: { transactions: Transact
                 fontFamily: 'var(--font-mono)',
               }}
             />
-            <Bar dataKey="income" name="Ingresos" fill="#3E7A54" radius={[3, 3, 0, 0]} animationDuration={600} />
-            <Bar dataKey="expense" name="Gastos" fill="#A8432E" radius={[3, 3, 0, 0]} animationDuration={600} />
+            <Bar dataKey="income" name="Ingresos" fill="var(--status-success)" radius={[3, 3, 0, 0]} animationDuration={600} />
+            <Bar dataKey="expense" name="Gastos" fill="var(--status-error)" radius={[3, 3, 0, 0]} animationDuration={600} />
           </BarChart>
         </ResponsiveContainer>
       </div>

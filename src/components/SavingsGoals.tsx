@@ -1,14 +1,16 @@
 import { useState, type FormEvent } from 'react'
 import { motion } from 'motion/react'
-import { Plus, Target, Trash, CheckCircle } from '@phosphor-icons/react'
+import { Plus, Target, Trash, CheckCircle, PencilSimple } from '@phosphor-icons/react'
 import { useSavingsGoals } from '../hooks/useSavingsGoals'
 import BottomSheet from '../components/BottomSheet'
 import EmptyState from '../components/EmptyState'
 import { formatCurrency, formatDate } from '../lib/format'
+import type { SavingsGoal } from '../lib/types'
 
 export default function SavingsGoals() {
-  const { goals, loading, addGoal, contribute, removeGoal } = useSavingsGoals()
+  const { goals, loading, addGoal, contribute, updateGoal, removeGoal } = useSavingsGoals()
   const [createOpen, setCreateOpen] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [contributeId, setContributeId] = useState<string | null>(null)
 
   const [name, setName] = useState('')
@@ -23,10 +25,21 @@ export default function SavingsGoals() {
   const [contributing, setContributing] = useState(false)
 
   function openCreate() {
+    setEditingId(null)
     setName('')
     setTargetAmount('')
     setCurrentAmount('')
     setTargetDate('')
+    setFormError(null)
+    setCreateOpen(true)
+  }
+
+  function openEdit(goal: SavingsGoal) {
+    setEditingId(goal.id)
+    setName(goal.name)
+    setTargetAmount(String(goal.target_amount))
+    setCurrentAmount(String(goal.current_amount))
+    setTargetDate(goal.target_date ?? '')
     setFormError(null)
     setCreateOpen(true)
   }
@@ -45,12 +58,13 @@ export default function SavingsGoals() {
       return
     }
     setSubmitting(true)
-    const result = await addGoal({
+    const payload = {
       name: name.trim(),
       target_amount: parsedTarget,
       current_amount: parsedCurrent,
       target_date: targetDate || null,
-    })
+    }
+    const result = editingId ? await updateGoal(editingId, payload) : await addGoal(payload)
     setSubmitting(false)
     if (result.error) {
       setFormError(result.error)
@@ -127,14 +141,24 @@ export default function SavingsGoals() {
                   {reached && <CheckCircle size={16} weight="fill" className="text-success" />}
                   <p className="text-sm font-medium text-text-primary">{g.name}</p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => removeGoal(g.id)}
-                  aria-label="Borrar meta"
-                  className="text-text-tertiary hover:text-error"
-                >
-                  <Trash size={16} />
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => openEdit(g)}
+                    aria-label={`Editar ${g.name}`}
+                    className="text-text-tertiary hover:text-brand-primary"
+                  >
+                    <PencilSimple size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeGoal(g.id)}
+                    aria-label="Borrar meta"
+                    className="text-text-tertiary hover:text-error"
+                  >
+                    <Trash size={16} />
+                  </button>
+                </div>
               </div>
 
               <div className="mb-1 flex justify-between text-xs text-text-secondary">
@@ -171,7 +195,11 @@ export default function SavingsGoals() {
         })}
       </ul>
 
-      <BottomSheet open={createOpen} onClose={() => setCreateOpen(false)} title="Crear meta de ahorro">
+      <BottomSheet
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        title={editingId ? 'Editar meta' : 'Crear meta de ahorro'}
+      >
         <form onSubmit={handleCreate} className="space-y-4">
           <div>
             <label htmlFor="goalName" className="mb-1 block text-sm font-medium text-text-secondary">
@@ -247,7 +275,7 @@ export default function SavingsGoals() {
             disabled={submitting}
             className="w-full rounded-control bg-brand-primary py-2.5 font-medium text-text-inverse disabled:opacity-50"
           >
-            {submitting ? 'Guardando…' : 'Crear meta'}
+            {submitting ? 'Guardando…' : editingId ? 'Guardar cambios' : 'Crear meta'}
           </motion.button>
         </form>
       </BottomSheet>

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'motion/react'
 import { Link } from 'react-router-dom'
-import { Gear, ArrowsLeftRight } from '@phosphor-icons/react'
+import { Gear, ArrowsLeftRight, Sun, Moon, DeviceMobile } from '@phosphor-icons/react'
+import { useTheme } from '../hooks/useTheme'
 import { useAssets } from '../hooks/useAssets'
 import { useLiabilities } from '../hooks/useLiabilities'
 import { useInvestments } from '../hooks/useInvestments'
@@ -19,6 +20,7 @@ import { formatCurrency, formatDate } from '../lib/format'
 
 export default function Resumen() {
   const { user, signOut } = useAuth()
+  const { preference, setPreference } = useTheme()
   const { assets, loading: loadingAssets } = useAssets()
   const { liabilities, loading: loadingLiabilities } = useLiabilities()
   const { investments } = useInvestments()
@@ -131,6 +133,47 @@ export default function Resumen() {
 
       <BottomSheet open={settingsOpen} onClose={() => setSettingsOpen(false)} title="Ajustes">
         <p className="mb-4 text-sm text-text-secondary">Sesión iniciada como {user?.email}</p>
+
+        <p className="mb-2 text-sm font-medium text-text-secondary">Apariencia</p>
+        <div className="mb-6 flex gap-2">
+          <button
+            type="button"
+            onClick={() => setPreference('light')}
+            className={`flex flex-1 flex-col items-center gap-1 rounded-control border py-2.5 text-xs font-medium transition-colors ${
+              preference === 'light'
+                ? 'border-brand-primary bg-brand-primary-soft text-brand-primary'
+                : 'border-border-default text-text-secondary'
+            }`}
+          >
+            <Sun size={18} />
+            Claro
+          </button>
+          <button
+            type="button"
+            onClick={() => setPreference('dark')}
+            className={`flex flex-1 flex-col items-center gap-1 rounded-control border py-2.5 text-xs font-medium transition-colors ${
+              preference === 'dark'
+                ? 'border-brand-primary bg-brand-primary-soft text-brand-primary'
+                : 'border-border-default text-text-secondary'
+            }`}
+          >
+            <Moon size={18} />
+            Oscuro
+          </button>
+          <button
+            type="button"
+            onClick={() => setPreference('system')}
+            className={`flex flex-1 flex-col items-center gap-1 rounded-control border py-2.5 text-xs font-medium transition-colors ${
+              preference === 'system'
+                ? 'border-brand-primary bg-brand-primary-soft text-brand-primary'
+                : 'border-border-default text-text-secondary'
+            }`}
+          >
+            <DeviceMobile size={18} />
+            Automático
+          </button>
+        </div>
+
         <button
           type="button"
           onClick={signOut}

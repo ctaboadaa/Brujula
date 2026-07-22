@@ -76,6 +76,45 @@
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 }
 
+/* ====== MODO OSCURO — navegación nocturna: cielo navy + acento dorado (estrellas) ====== */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --surface-base: #12161f;
+  --surface-primary: #1b212c;
+  --surface-secondary: #232a37;
+  --surface-tertiary: #2a3240;
+  --surface-elevated: #1f2631;
+  --surface-overlay: rgba(0, 0, 0, 0.6);
+
+  --text-primary: #f0e9da;
+  --text-secondary: #b8af9d;
+  --text-tertiary: #7d7869;
+  --text-inverse: #12161f;
+
+  --border-default: #333c4b;
+  --border-strong: #454f60;
+
+  --brand-primary: #d9ae5f;
+  --brand-primary-hover: #e6bf75;
+  --brand-primary-soft: rgba(217, 174, 95, 0.15);
+  --brand-primary-text: #12161f;
+
+  --brand-secondary: #7bb0d6;
+  --brand-secondary-soft: rgba(123, 176, 214, 0.15);
+
+  --status-success: #6fbf8b;
+  --status-success-soft: rgba(111, 191, 139, 0.15);
+  --status-error: #e08669;
+  --status-error-soft: rgba(224, 134, 105, 0.15);
+  --status-warning: #e8b563;
+  --status-warning-soft: rgba(232, 181, 99, 0.15);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 10px -2px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 28px -8px rgba(0, 0, 0, 0.5);
+}
+
 @theme inline {
   --color-surface-base: var(--surface-base);
   --color-surface-primary: var(--surface-primary);
@@ -140,4 +179,8 @@ body {
   background-color: var(--surface-base);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cg fill='none' stroke='%232B2417' stroke-opacity='0.05' stroke-width='1'%3E%3Cpath d='M-20 60 Q60 20 120 60 T260 60'/%3E%3Cpath d='M-20 110 Q60 70 120 110 T260 110'/%3E%3Cpath d='M-20 160 Q60 120 120 160 T260 160'/%3E%3Cpath d='M-20 210 Q60 170 120 210 T260 210'/%3E%3C/g%3E%3C/svg%3E");
   background-size: 240px 240px;
+}
+
+:root[data-theme="dark"] .bg-topo {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cg fill='none' stroke='%23F0E9DA' stroke-opacity='0.06' stroke-width='1'%3E%3Cpath d='M-20 60 Q60 20 120 60 T260 60'/%3E%3Cpath d='M-20 110 Q60 70 120 110 T260 110'/%3E%3Cpath d='M-20 160 Q60 120 120 160 T260 160'/%3E%3Cpath d='M-20 210 Q60 170 120 210 T260 210'/%3E%3C/g%3E%3C/svg%3E");
 }

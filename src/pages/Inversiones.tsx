@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { motion } from 'motion/react'
-import { Plus, ChartLineUp, Trash, ArrowClockwise } from '@phosphor-icons/react'
-import { useInvestments } from '../hooks/useInvestments'
+import { Plus, ChartLineUp, Trash, ArrowClockwise, PencilSimple } from '@phosphor-icons/react'
+import { useInvestments, type InvestmentWithPrice } from '../hooks/useInvestments'
 import { useCountUp } from '../hooks/useCountUp'
 import BottomSheet from '../components/BottomSheet'
 import EmptyState from '../components/EmptyState'
@@ -28,10 +28,12 @@ export default function Inversiones() {
     pricesLoading,
     priceError,
     addInvestment,
+    updateInvestment,
     removeInvestment,
     refreshPrices,
   } = useInvestments()
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
 
   const [symbol, setSymbol] = useState('')
   const [name, setName] = useState('')
@@ -52,10 +54,23 @@ export default function Inversiones() {
   }, null)
 
   function openSheet() {
+    setEditingId(null)
     setSymbol('')
     setName('')
+    setType('stock')
     setQuantity('')
     setAvgCost('')
+    setFormError(null)
+    setSheetOpen(true)
+  }
+
+  function openEdit(inv: InvestmentWithPrice) {
+    setEditingId(inv.id)
+    setSymbol(inv.symbol)
+    setName(inv.name)
+    setType(inv.type)
+    setQuantity(String(inv.quantity))
+    setAvgCost(inv.avg_cost !== null ? String(inv.avg_cost) : '')
     setFormError(null)
     setSheetOpen(true)
   }
@@ -73,13 +88,14 @@ export default function Inversiones() {
       return
     }
     setSubmitting(true)
-    const result = await addInvestment({
+    const payload = {
       symbol: symbol.trim().toUpperCase(),
       name: name.trim(),
       type,
       quantity: parsedQuantity,
       avg_cost: avgCost ? Number(avgCost) : null,
-    })
+    }
+    const result = editingId ? await updateInvestment(editingId, payload) : await addInvestment(payload)
     setSubmitting(false)
     if (result.error) {
       setFormError(result.error)
@@ -181,21 +197,35 @@ export default function Inversiones() {
                 <span className="font-mono">
                   {inv.quantity} × {inv.priceUsd !== null ? `US$ ${inv.priceUsd.toFixed(2)}` : '—'} · {timeAgo(inv.priceFetchedAt)}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => removeInvestment(inv.id)}
-                  aria-label="Borrar inversión"
-                  className="text-text-tertiary hover:text-error"
-                >
-                  <Trash size={16} />
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => openEdit(inv)}
+                    aria-label={`Editar ${inv.symbol}`}
+                    className="text-text-tertiary hover:text-brand-primary"
+                  >
+                    <PencilSimple size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeInvestment(inv.id)}
+                    aria-label="Borrar inversión"
+                    className="text-text-tertiary hover:text-error"
+                  >
+                    <Trash size={16} />
+                  </button>
+                </div>
               </div>
             </motion.li>
           )
         })}
       </ul>
 
-      <BottomSheet open={sheetOpen} onClose={() => setSheetOpen(false)} title="Agregar inversión">
+      <BottomSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        title={editingId ? 'Editar inversión' : 'Agregar inversión'}
+      >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="type" className="mb-1 block text-sm font-medium text-text-secondary">
@@ -289,7 +319,7 @@ export default function Inversiones() {
             disabled={submitting}
             className="w-full rounded-control bg-brand-primary py-2.5 font-medium text-text-inverse disabled:opacity-50"
           >
-            {submitting ? 'Guardando…' : 'Guardar inversión'}
+            {submitting ? 'Guardando…' : editingId ? 'Guardar cambios' : 'Guardar inversión'}
           </motion.button>
         </form>
       </BottomSheet>

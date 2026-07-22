@@ -75,6 +75,13 @@ export function useInvestments() {
     return { error: null }
   }
 
+  async function updateInvestment(id: string, input: Partial<NewInvestment>) {
+    const { error } = await supabase.from('investments').update(input).eq('id', id)
+    if (error) return { error: 'No pudimos guardar los cambios.' }
+    await refetch()
+    return { error: null }
+  }
+
   async function removeInvestment(id: string) {
     const { error } = await supabase.from('investments').delete().eq('id', id)
     if (error) return { error: 'No pudimos borrar la inversión.' }
@@ -105,6 +112,7 @@ export function useInvestments() {
     priceError,
     usdToPen,
     addInvestment,
+    updateInvestment,
     removeInvestment,
     refreshPrices,
   }

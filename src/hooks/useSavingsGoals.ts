@@ -53,6 +53,16 @@ export function useSavingsGoals() {
     return { error: null }
   }
 
+  async function updateGoal(id: string, input: Partial<NewSavingsGoal>) {
+    const { error } = await supabase
+      .from('savings_goals')
+      .update({ ...input, updated_at: new Date().toISOString() })
+      .eq('id', id)
+    if (error) return { error: 'No pudimos guardar los cambios.' }
+    await refetch()
+    return { error: null }
+  }
+
   async function removeGoal(id: string) {
     const { error } = await supabase.from('savings_goals').delete().eq('id', id)
     if (error) return { error: 'No pudimos borrar la meta.' }
@@ -60,5 +70,5 @@ export function useSavingsGoals() {
     return { error: null }
   }
 
-  return { goals, loading, error, addGoal, contribute, removeGoal, refetch }
+  return { goals, loading, error, addGoal, contribute, updateGoal, removeGoal, refetch }
 }

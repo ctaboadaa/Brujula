@@ -96,8 +96,8 @@ export default function NetWorthTrend({ snapshots }: { snapshots: NetWorthSnapsh
           <AreaChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 4 }}>
             <defs>
               <linearGradient id="netWorthFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#1F3A5F" stopOpacity={0.25} />
-                <stop offset="100%" stopColor="#1F3A5F" stopOpacity={0} />
+                <stop offset="0%" stopColor="var(--brand-primary)" stopOpacity={0.25} />
+                <stop offset="100%" stopColor="var(--brand-primary)" stopOpacity={0} />
               </linearGradient>
             </defs>
             <XAxis dataKey="label" tick={{ fontSize: 10, fill: 'var(--text-tertiary)' }} axisLine={false} tickLine={false} />
@@ -115,7 +115,7 @@ export default function NetWorthTrend({ snapshots }: { snapshots: NetWorthSnapsh
             <Area
               type="monotone"
               dataKey="net_worth"
-              stroke="#1F3A5F"
+              stroke="var(--brand-primary)"
               strokeWidth={2}
               fill="url(#netWorthFill)"
               animationDuration={600}
