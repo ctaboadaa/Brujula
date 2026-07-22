@@ -14,7 +14,7 @@ Herramienta personal (NO se vende) para que el usuario lleve el control de sus i
 
 ## Dirección de Arte (Sesión 1 — NO cambiar sin justificación)
 - Arquetipo: Explorador (con toque Sabio) — rompe a propósito el azul/verde corporativo típico de fintech (Empower/Monarch); mundo del sujeto: cartografía/instrumentos de navegación
-- Modo: CLARO, tipo papel de mapa envejecido (decisión deliberada, distinto al fintech oscuro típico)
+- Modo: CLARO por defecto, tipo papel de mapa envejecido (decisión deliberada, distinto al fintech oscuro típico) — desde 2026-07-21 también existe modo OSCURO opcional ("navegación nocturna": navy profundo + acento dorado en vez de azul marino), ver sección más abajo
 - Fondo base: #F6F1E4 | Superficie elevada: #EFE6D2 / #E8DCC4
 - Texto: #2B2417 (principal) / #6B5D45 (secundario)
 - Acento primario: #1F3A5F (azul tinta marino — SOLO en CTA/navegación)
@@ -107,14 +107,24 @@ El usuario pidió una revisión general; se priorizaron 4 de 11 hallazgos:
 - **Code-splitting**: rutas protegidas cargadas con `React.lazy` — el bundle principal bajó de ~1050KB a ~582KB; el código de gráficos (Recharts) ahora es un chunk aparte que solo se descarga al entrar a Resumen.
 - Probado con datos reales (renombrar/borrar categorías) y con build real (tamaños de chunk verificados) — usuario y datos de prueba borrados al terminar.
 
-**Pendientes de la revisión, no priorizados esta vez** (quedan para cuando el usuario los pida):
-- Editar inversiones ya creadas (hoy solo se puede agregar/borrar, no ajustar cantidad)
-- Editar nombre/monto objetivo de una meta de ahorro ya creada (hoy solo se puede aportar o borrar)
+Los 4 hallazgos restantes se resolvieron en la misma sesión (ver secciones de abajo). Solo quedan pendientes:
 - Filtros/paginación en Movimientos si la lista crece mucho
-- Colores de los gráficos (`NetWorthTrend`/`CashflowTrend`) están en hex directo en vez de tokens CSS
-- Modo oscuro (decisión consciente de no tenerlo, se puede agregar)
-- Manifest/ícono para "agregar a pantalla de inicio" del celular
 - Celebración visual al alcanzar hitos reales de patrimonio
+
+## Editar inversiones y metas de ahorro (a pedido del usuario, 2026-07-21)
+- Inversiones: ícono de lápiz por fila → `updateInvestment` (antes solo se podía agregar/borrar, perdiendo el registro si comprabas más de lo mismo)
+- Metas de ahorro: ícono de lápiz por meta → `updateGoal` (nombre, monto objetivo, fecha — el aporte rápido sigue aparte)
+- Probado con build real (tsc/build limpios); mismo patrón ya verificado en activos/pasivos
+
+## Modo oscuro (a pedido del usuario, 2026-07-21)
+- Paleta derivada del mismo mundo cartográfico: de día es "papel de mapa" (claro), de noche es "navegación nocturna" — fondo navy profundo (#12161F), texto crema (#F0E9DA), y el acento cambia de azul marino a **dorado** (#D9AE5F, como luz de estrella guiando de noche) para que siga siendo legible y memorable, no un dark mode genérico
+- Selector Claro/Oscuro/Automático en Ajustes (`useTheme.tsx`, contexto + `data-theme` en `<html>`), persistido en `localStorage`, "Automático" sigue el sistema operativo y reacciona si cambia mientras la app está abierta
+- De paso corregido: los colores de `NetWorthTrend`/`CashflowTrend` estaban en hex fijo (no seguían el tema) — ahora usan `var(--brand-primary)`, `var(--status-success)`, etc., así los gráficos también cambian solos con el tema
+- Probado con datos reales en las 4 pantallas (Resumen, Movimientos, Patrimonio, Inversiones) — colores, iconos y gráficos verificados en modo oscuro
+
+## App instalable / PWA (a pedido del usuario, 2026-07-21)
+- `public/manifest.webmanifest` + íconos PNG generados desde el favicon (`apple-touch-icon.png` 180px, `icon-192.png`, `icon-512.png`, vía script de un solo uso `scripts/generate-icons.mjs` con `@resvg/resvg-js`, no quedó como dependencia del proyecto)
+- Tags en `index.html`: manifest, apple-touch-icon, theme-color, meta tags de "web app capable" — el usuario ya puede "Agregar a pantalla de inicio" en Android/iOS y se ve con ícono propio, no como pestaña de navegador
 
 ## Próximas sesiones 📋
 - A futuro, si el usuario lo pide: cualquiera de los pendientes de la revisión de arriba
