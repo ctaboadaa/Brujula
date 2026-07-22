@@ -10,13 +10,16 @@ import { useTransactions } from '../hooks/useTransactions'
 import { useCategories } from '../hooks/useCategories'
 import { useCountUp } from '../hooks/useCountUp'
 import { useNetWorthHistory } from '../hooks/useNetWorthHistory'
+import { useUserSettings } from '../hooks/useUserSettings'
 import { useAuth } from '../hooks/useAuth'
 import BottomSheet from '../components/BottomSheet'
 import EmptyState from '../components/EmptyState'
 import NetWorthTrend from '../components/NetWorthTrend'
 import CashflowTrend from '../components/CashflowTrend'
 import FreedomNumber from '../components/FreedomNumber'
+import MilestoneCelebration from '../components/MilestoneCelebration'
 import { formatCurrency, formatDate } from '../lib/format'
+import { highestMilestone } from '../lib/milestones'
 
 export default function Resumen() {
   const { user, signOut } = useAuth()
@@ -27,8 +30,10 @@ export default function Resumen() {
   const { transactions, loading: loadingTransactions } = useTransactions()
   const { categories } = useCategories()
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [celebratingMilestone, setCelebratingMilestone] = useState<number | null>(null)
 
   const { snapshots, recordSnapshot } = useNetWorthHistory()
+  const { celebratedMilestone, loading: loadingSettings, setCelebratedMilestoneValue } = useUserSettings()
 
   const totalAssets = assets.reduce((sum, a) => sum + a.value, 0)
   const totalLiabilities = liabilities.reduce((sum, l) => sum + l.amount, 0)
@@ -41,6 +46,20 @@ export default function Resumen() {
     recordSnapshot({ totalAssets, totalInvestments, totalLiabilities })
   }, [loadingAssets, loadingLiabilities, totalAssets, totalInvestments, totalLiabilities, recordSnapshot])
 
+  useEffect(() => {
+    if (loadingAssets || loadingLiabilities || loadingSettings) return
+    const reached = highestMilestone(currentNetWorth)
+    if (reached === 0) return
+    if (celebratedMilestone === null) {
+      setCelebratedMilestoneValue(reached)
+      return
+    }
+    if (reached > celebratedMilestone) {
+      setCelebratingMilestone(reached)
+      setCelebratedMilestoneValue(reached)
+    }
+  }, [loadingAssets, loadingLiabilities, loadingSettings, currentNetWorth, celebratedMilestone])
+
   const recent = useMemo(() => transactions.slice(0, 4), [transactions])
 
   function categoryName(id: string | null) {
@@ -52,6 +71,8 @@ export default function Resumen() {
 
   return (
     <div className="mx-auto max-w-md px-4 pt-8">
+      <MilestoneCelebration milestone={celebratingMilestone} onDismiss={() => setCelebratingMilestone(null)} />
+
       <div className="mb-5 flex items-center justify-between">
         <div>
           <p className="text-sm text-text-secondary">Hola,</p>

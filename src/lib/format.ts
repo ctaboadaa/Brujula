@@ -27,3 +27,10 @@ export function todayIsoDate(): string {
   const local = new Date(now.getTime() - offset * 60_000)
   return local.toISOString().slice(0, 10)
 }
+
+const monthYearFormatter = new Intl.DateTimeFormat('es-PE', { month: 'long', year: 'numeric' })
+
+export function formatMonthYear(date: Date): string {
+  const s = monthYearFormatter.format(date)
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}

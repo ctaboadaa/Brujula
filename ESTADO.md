@@ -107,9 +107,7 @@ El usuario pidió una revisión general; se priorizaron 4 de 11 hallazgos:
 - **Code-splitting**: rutas protegidas cargadas con `React.lazy` — el bundle principal bajó de ~1050KB a ~582KB; el código de gráficos (Recharts) ahora es un chunk aparte que solo se descarga al entrar a Resumen.
 - Probado con datos reales (renombrar/borrar categorías) y con build real (tamaños de chunk verificados) — usuario y datos de prueba borrados al terminar.
 
-Los 4 hallazgos restantes se resolvieron en la misma sesión (ver secciones de abajo). Solo quedan pendientes:
-- Filtros/paginación en Movimientos si la lista crece mucho
-- Celebración visual al alcanzar hitos reales de patrimonio
+Los 11 hallazgos de la revisión quedaron resueltos en esta misma sesión (ver secciones de abajo, incluidos los dos últimos: filtros/navegación mensual en Movimientos y celebración de hitos de patrimonio).
 
 ## Editar inversiones y metas de ahorro (a pedido del usuario, 2026-07-21)
 - Inversiones: ícono de lápiz por fila → `updateInvestment` (antes solo se podía agregar/borrar, perdiendo el registro si comprabas más de lo mismo)
@@ -126,8 +124,23 @@ Los 4 hallazgos restantes se resolvieron en la misma sesión (ver secciones de a
 - `public/manifest.webmanifest` + íconos PNG generados desde el favicon (`apple-touch-icon.png` 180px, `icon-192.png`, `icon-512.png`, vía script de un solo uso `scripts/generate-icons.mjs` con `@resvg/resvg-js`, no quedó como dependencia del proyecto)
 - Tags en `index.html`: manifest, apple-touch-icon, theme-color, meta tags de "web app capable" — el usuario ya puede "Agregar a pantalla de inicio" en Android/iOS y se ve con ícono propio, no como pestaña de navegador
 
+## Filtros y navegación mensual en Movimientos (a pedido del usuario, 2026-07-21 — último pendiente de la revisión técnica)
+- La pantalla de Movimientos mostraba TODO el historial en una sola lista sin forma de acotarlo — ahora tiene navegación real por mes ("← Julio de 2026 →", botón siguiente deshabilitado en el mes actual para no navegar al futuro) igual que pide la regla de vistas temporales del sistema
+- Se sumó un filtro por categoría (dropdown, junto a los chips existentes de Ingresos/Gastos) — las opciones se acotan automáticamente al tipo de filtro activo, con opción "Sin categoría"
+- Estado vacío diferenciado: si nunca hubo movimientos muestra el CTA de "registra tu primer movimiento"; si hay historial pero el mes/filtro elegido no tiene resultados, muestra un mensaje distinto sugiriendo cambiar de mes o quitar el filtro
+- Nuevo helper `formatMonthYear` en `lib/format.ts`
+- Probado con datos reales de 3 meses distintos (julio/junio/mayo) y varias categorías insertadas por SQL: navegación mes a mes, filtro por categoría (incluida "Sin categoría"), combinación filtro+categoría vacía, y el tope de "no ir al futuro" — todo verificado, usuario y datos de prueba borrados al terminar
+
+## Celebración al alcanzar hitos de patrimonio (a pedido del usuario, 2026-07-21 — último pendiente de la revisión técnica)
+- Motivo: la app calculaba el patrimonio pero nunca celebraba el progreso — un hábito financiero se sostiene mejor con reconocimiento en momentos reales, no solo con números
+- Hitos definidos en soles (`lib/milestones.ts`): S/1,000 · 5,000 · 10,000 · 25,000 · 50,000 · 100,000 · 250,000 · 500,000 · 1,000,000 · 2,500,000 · 5,000,000 · 10,000,000
+- Columna `celebrated_net_worth_milestone` en `user_settings` (nullable): guarda el hito más alto ya celebrado. La PRIMERA vez que se detecta el patrimonio (columna en null) se guarda el hito actual como línea base SIN celebrar — para no lanzar una celebración retroactiva a alguien que ya tenía, por ejemplo, S/50,000 antes de que existiera esta función. Solo se celebra cuando el patrimonio SUPERA un hito nuevo a partir de ahí.
+- `MilestoneCelebration.tsx`: modal centrado (no bottom sheet, para que se sienta como un momento especial) con confetti hecho con Motion (sin librería extra), ícono de bandera dorada, monto del hito y mensaje. Respeta `prefers-reduced-motion` (sin confetti animado, el mensaje se ve igual)
+- Probado con datos reales: creado un patrimonio de S/8,000 (no celebra, guarda línea base 5,000 en silencio) → subido a S/12,000 (celebra el hito de S/10,000, con confetti) → recargado (no se repite, ya quedó guardado) → verificado también en modo oscuro (paleta dorado/navy se ve bien en el modal). Usuario y datos de prueba borrados al terminar.
+- Nota técnica (no es bug de la app): al crear usuarios de prueba por SQL hay que insertar también una fila en `auth.identities` y usar `''` en vez de `NULL` en las columnas de tokens (`confirmation_token`, etc.) — si no, Supabase Auth rechaza el login con un error 500 disfrazado de "credenciales inválidas". Anotado para no perder tiempo la próxima vez.
+
 ## Próximas sesiones 📋
-- A futuro, si el usuario lo pide: cualquiera de los pendientes de la revisión de arriba
+- Con esto se cierran TODOS los pendientes de la revisión técnica del 2026-07-21. No hay tareas activas pendientes — a futuro, lo que el usuario pida.
 - Advisor de seguridad (no bloqueante): Supabase sugiere activar "Leaked Password Protection" (revisa contraseñas contra HaveIBeenPwned) — toggle en el dashboard, pendiente de que el usuario decida si lo activa
 
 ## Problemas conocidos ⚠️

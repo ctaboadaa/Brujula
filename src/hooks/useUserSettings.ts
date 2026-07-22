@@ -3,12 +3,17 @@ import { supabase } from '../lib/supabase'
 
 export function useUserSettings() {
   const [annualExpenseTarget, setAnnualExpenseTarget] = useState<number | null>(null)
+  const [celebratedMilestone, setCelebratedMilestone] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
 
   const refetch = useCallback(async () => {
     setLoading(true)
-    const { data } = await supabase.from('user_settings').select('annual_expense_target').maybeSingle()
+    const { data } = await supabase
+      .from('user_settings')
+      .select('annual_expense_target, celebrated_net_worth_milestone')
+      .maybeSingle()
     setAnnualExpenseTarget(data?.annual_expense_target ?? null)
+    setCelebratedMilestone(data?.celebrated_net_worth_milestone ?? null)
     setLoading(false)
   }, [])
 
@@ -25,5 +30,12 @@ export function useUserSettings() {
     return { error: null }
   }
 
-  return { annualExpenseTarget, loading, setAnnualExpense }
+  async function setCelebratedMilestoneValue(value: number) {
+    setCelebratedMilestone(value)
+    await supabase
+      .from('user_settings')
+      .upsert({ celebrated_net_worth_milestone: value, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
+  }
+
+  return { annualExpenseTarget, celebratedMilestone, loading, setAnnualExpense, setCelebratedMilestoneValue }
 }

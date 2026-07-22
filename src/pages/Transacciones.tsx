@@ -1,6 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { motion } from 'motion/react'
-import { Plus, ArrowsLeftRight, TrendUp, TrendDown, Trash } from '@phosphor-icons/react'
+import { Plus, ArrowsLeftRight, TrendUp, TrendDown, Trash, CaretLeft, CaretRight } from '@phosphor-icons/react'
 import { useTransactions } from '../hooks/useTransactions'
 import { useCategories } from '../hooks/useCategories'
 import BottomSheet from '../components/BottomSheet'
@@ -8,15 +8,22 @@ import EmptyState from '../components/EmptyState'
 import BudgetOverview from '../components/BudgetOverview'
 import ExportCsv from '../components/ExportCsv'
 import CategoryManager from '../components/CategoryManager'
-import { formatCurrency, formatDate, todayIsoDate } from '../lib/format'
+import { formatCurrency, formatDate, formatMonthYear, todayIsoDate } from '../lib/format'
 import type { CategoryType } from '../lib/types'
 
 type Filter = 'all' | CategoryType
+const NO_CATEGORY = '__none__'
+
+function monthKeyOf(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+}
 
 export default function Transacciones() {
   const { transactions, loading, error, addTransaction, removeTransaction } = useTransactions()
   const { categories, addCategory } = useCategories()
   const [filter, setFilter] = useState<Filter>('all')
+  const [categoryFilter, setCategoryFilter] = useState<string>('all')
+  const [monthOffset, setMonthOffset] = useState(0)
   const [sheetOpen, setSheetOpen] = useState(false)
 
   const [type, setType] = useState<CategoryType>('expense')
@@ -29,7 +36,38 @@ export default function Transacciones() {
   const [formError, setFormError] = useState<string | null>(null)
 
   const filteredCategories = categories.filter((c) => c.type === type)
-  const filtered = filter === 'all' ? transactions : transactions.filter((t) => t.type === filter)
+
+  const selectedMonthDate = useMemo(
+    () => new Date(new Date().getFullYear(), new Date().getMonth() - monthOffset, 1),
+    [monthOffset],
+  )
+  const monthKey = monthKeyOf(selectedMonthDate)
+  const isCurrentMonth = monthOffset === 0
+
+  const monthCategoryOptions = filter === 'all' ? categories : categories.filter((c) => c.type === filter)
+
+  const monthTransactions = useMemo(
+    () => transactions.filter((t) => t.date.startsWith(monthKey)),
+    [transactions, monthKey],
+  )
+  const filtered = useMemo(
+    () =>
+      monthTransactions.filter((t) => {
+        if (filter !== 'all' && t.type !== filter) return false
+        if (categoryFilter === 'all') return true
+        if (categoryFilter === NO_CATEGORY) return !t.category_id
+        return t.category_id === categoryFilter
+      }),
+    [monthTransactions, filter, categoryFilter],
+  )
+
+  function goToPreviousMonth() {
+    setMonthOffset((prev) => prev + 1)
+  }
+
+  function goToNextMonth() {
+    setMonthOffset((prev) => Math.max(0, prev - 1))
+  }
 
   const grouped = useMemo(() => {
     const groups = new Map<string, typeof filtered>()
@@ -109,12 +147,36 @@ export default function Transacciones() {
         </div>
       </div>
 
-      <div className="mb-5 flex gap-2">
+      <div className="mb-4 flex items-center justify-between rounded-control border border-border-default bg-surface-elevated px-2 py-2">
+        <button
+          type="button"
+          onClick={goToPreviousMonth}
+          aria-label="Mes anterior"
+          className="flex h-8 w-8 items-center justify-center rounded-full text-text-secondary hover:bg-surface-secondary"
+        >
+          <CaretLeft size={16} weight="bold" />
+        </button>
+        <p className="font-mono text-sm font-medium text-text-primary">{formatMonthYear(selectedMonthDate)}</p>
+        <button
+          type="button"
+          onClick={goToNextMonth}
+          disabled={isCurrentMonth}
+          aria-label="Mes siguiente"
+          className="flex h-8 w-8 items-center justify-center rounded-full text-text-secondary hover:bg-surface-secondary disabled:opacity-30"
+        >
+          <CaretRight size={16} weight="bold" />
+        </button>
+      </div>
+
+      <div className="mb-5 flex flex-wrap gap-2">
         {(['all', 'income', 'expense'] as Filter[]).map((f) => (
           <button
             key={f}
             type="button"
-            onClick={() => setFilter(f)}
+            onClick={() => {
+              setFilter(f)
+              setCategoryFilter('all')
+            }}
             className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${
               filter === f
                 ? 'bg-brand-primary text-text-inverse'
@@ -124,6 +186,22 @@ export default function Transacciones() {
             {f === 'all' ? 'Todos' : f === 'income' ? 'Ingresos' : 'Gastos'}
           </button>
         ))}
+        {monthCategoryOptions.length > 0 && (
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            aria-label="Filtrar por categoría"
+            className="rounded-full border border-border-default bg-surface-elevated px-3 py-1.5 text-sm text-text-secondary outline-none focus:border-brand-primary"
+          >
+            <option value="all">Todas las categorías</option>
+            <option value={NO_CATEGORY}>Sin categoría</option>
+            {monthCategoryOptions.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       <BudgetOverview categories={categories} transactions={transactions} />
@@ -131,13 +209,21 @@ export default function Transacciones() {
       {loading && <p className="py-8 text-center text-text-secondary">Cargando…</p>}
       {error && <p className="py-4 text-center text-error">{error}</p>}
 
-      {!loading && !error && filtered.length === 0 && (
+      {!loading && !error && filtered.length === 0 && transactions.length === 0 && (
         <EmptyState
           icon={<ArrowsLeftRight size={32} weight="duotone" />}
           title="Todavía no registras movimientos"
           description="Anota tu primer ingreso o gasto y empieza a ver el rumbo de tu dinero."
           actionLabel="Registrar movimiento"
           onAction={openSheet}
+        />
+      )}
+
+      {!loading && !error && filtered.length === 0 && transactions.length > 0 && (
+        <EmptyState
+          icon={<ArrowsLeftRight size={32} weight="duotone" />}
+          title="Sin movimientos con estos filtros"
+          description="No encontramos movimientos en este mes con los filtros elegidos. Prueba otro mes o quita algún filtro."
         />
       )}
 
