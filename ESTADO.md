@@ -99,12 +99,29 @@ Herramienta personal (NO se vende) para que el usuario lleve el control de sus i
 - Ícono de lápiz en cada fila de Activos/Pasivos (Patrimonio) que abre la misma sheet de crear, precargada, y guarda con `updateAsset`/`updateLiability` (funciones que ya existían en los hooks pero no estaban conectadas a ninguna pantalla) en vez de crear un registro nuevo
 - Probado con datos reales: editar un activo y un pasivo existentes y confirmar por SQL que el valor se actualizó (no se creó un duplicado) — usuario y datos de prueba borrados al terminar
 
+## Revisión y mejoras técnicas (a pedido del usuario, 2026-07-21)
+El usuario pidió una revisión general; se priorizaron 4 de 11 hallazgos:
+- **Gestión de categorías**: ícono nuevo en Movimientos (`CategoryManager.tsx`) para renombrar/borrar categorías de ingreso/gasto — antes solo se creaban al vuelo, sin forma de corregir un typo. Borrar una categoría no borra sus movimientos (quedan "Sin categoría"). Hook `useCategories` ganó `renameCategory`.
+- **Favicon propio**: reemplazado el logo genérico morado de la plantilla de Vite por un ícono de brújula (navy + dorado, `public/favicon.svg`). Se borró `icons.svg` sin uso.
+- **Error Boundary**: `ErrorBoundary.tsx` envolviendo cada ruta protegida (por sección, para que la nav no se caiga si una pantalla falla) + uno global en `App`. Antes un error inesperado dejaba la app en blanco.
+- **Code-splitting**: rutas protegidas cargadas con `React.lazy` — el bundle principal bajó de ~1050KB a ~582KB; el código de gráficos (Recharts) ahora es un chunk aparte que solo se descarga al entrar a Resumen.
+- Probado con datos reales (renombrar/borrar categorías) y con build real (tamaños de chunk verificados) — usuario y datos de prueba borrados al terminar.
+
+**Pendientes de la revisión, no priorizados esta vez** (quedan para cuando el usuario los pida):
+- Editar inversiones ya creadas (hoy solo se puede agregar/borrar, no ajustar cantidad)
+- Editar nombre/monto objetivo de una meta de ahorro ya creada (hoy solo se puede aportar o borrar)
+- Filtros/paginación en Movimientos si la lista crece mucho
+- Colores de los gráficos (`NetWorthTrend`/`CashflowTrend`) están en hex directo en vez de tokens CSS
+- Modo oscuro (decisión consciente de no tenerlo, se puede agregar)
+- Manifest/ícono para "agregar a pantalla de inicio" del celular
+- Celebración visual al alcanzar hitos reales de patrimonio
+
 ## Próximas sesiones 📋
-- A futuro, si el usuario lo pide: filtros/paginación en Movimientos si la lista crece mucho, celebración visual al alcanzar hitos reales de patrimonio
+- A futuro, si el usuario lo pide: cualquiera de los pendientes de la revisión de arriba
 - Advisor de seguridad (no bloqueante): Supabase sugiere activar "Leaked Password Protection" (revisa contraseñas contra HaveIBeenPwned) — toggle en el dashboard, pendiente de que el usuario decida si lo activa
 
 ## Problemas conocidos ⚠️
-- Ninguno bloqueante. El chunk de JS de producción pesa ~640KB (185KB gzip) — aceptable para una app interna de un solo usuario; si se quiere optimizar después, dividir rutas con `React.lazy`.
+- Ninguno bloqueante.
 
 ## Pendientes del usuario (acciones que el usuario debe hacer)
 - [x] Repo de GitHub creado y conectado (`ctaboadaa/Brujula`) ✅
