@@ -1,8 +1,8 @@
 # ESTADO — Brújula
-Última actualización: 2026-07-21 | 🎉 App publicada y funcionando en https://ctaboadaa.github.io/Brujula/
+Última actualización: 2026-07-22 | 🎉 App publicada y funcionando en https://ctaboadaa.github.io/Brujula/
 
 ## Qué es esta app (3 líneas máximo)
-Herramienta personal (NO se vende) para que el usuario lleve el control de sus ingresos y gastos, vea el balance de su patrimonio neto (activos - pasivos) y monitoree sus inversiones con precios de mercado actualizados automáticamente. Un solo usuario, uso privado.
+Herramienta personal (NO se vende) para llevar el control de ingresos y gastos, ver el balance del patrimonio neto (activos - pasivos) y monitorear inversiones con precios de mercado automáticos. Desde 2026-07-22 soporta **multiusuario**: varias personas pueden crear su propia cuenta y cada una solo ve sus propios datos (sin control de acceso — el enlace no se comparte públicamente, así que no hace falta).
 
 ## Promesa central
 "Brújula te ayuda a ver tu camino real hacia la libertad financiera, mostrándote en un solo lugar cuánto ganas, cuánto gastas, y cuánto vale realmente lo que tienes — sin hojas de cálculo sueltas ni apps bancarias que no se hablan entre sí."
@@ -31,7 +31,7 @@ Herramienta personal (NO se vende) para que el usuario lleve el control de sus i
 - Backend: Supabase (proyecto "Brujula", id `ucjuyujfwrapcojropzb`, org "The Owl Group") — Postgres real con RLS (a diferencia de CajaBella que usa Apps Script/Sheets) porque hay más cálculo financiero e historial
 - Hosting: GitHub Pages (gratis), despliegue automático vía GitHub Actions (`.github/workflows/deploy.yml`) — publicada y verificada en https://ctaboadaa.github.io/Brujula/
 - Repo remoto: https://github.com/ctaboadaa/Brujula (rama `main`, deploy en cada push)
-- Single-user: solo el dueño usa la app, pero con RLS por `auth.uid()` en todas las tablas (buena práctica, deja la puerta abierta a futuro)
+- Multiusuario (desde 2026-07-22): la app ya soportaba esto de fondo porque todas las tablas tenían RLS por `auth.uid()` desde el día 1 — activarlo no tocó ni arriesgó ningún dato existente. Sin control de acceso a propósito (el usuario decidió no compartir el enlace públicamente, así que cualquiera con el link podría crear cuenta, pero en la práctica solo la comparte con quien él quiera)
 - Moneda: Soles (PEN) únicamente. Las inversiones cotizan en USD y se convierten a PEN con el tipo de cambio real (ver abajo)
 - Idioma UI: español, mono-idioma
 - Nombre app: Brújula (confirmado)
@@ -138,6 +138,16 @@ Los 11 hallazgos de la revisión quedaron resueltos en esta misma sesión (ver s
 - `MilestoneCelebration.tsx`: modal centrado (no bottom sheet, para que se sienta como un momento especial) con confetti hecho con Motion (sin librería extra), ícono de bandera dorada, monto del hito y mensaje. Respeta `prefers-reduced-motion` (sin confetti animado, el mensaje se ve igual)
 - Probado con datos reales: creado un patrimonio de S/8,000 (no celebra, guarda línea base 5,000 en silencio) → subido a S/12,000 (celebra el hito de S/10,000, con confetti) → recargado (no se repite, ya quedó guardado) → verificado también en modo oscuro (paleta dorado/navy se ve bien en el modal). Usuario y datos de prueba borrados al terminar.
 - Nota técnica (no es bug de la app): al crear usuarios de prueba por SQL hay que insertar también una fila en `auth.identities` y usar `''` en vez de `NULL` en las columnas de tokens (`confirmation_token`, etc.) — si no, Supabase Auth rechaza el login con un error 500 disfrazado de "credenciales inválidas". Anotado para no perder tiempo la próxima vez.
+
+## Multiusuario + nombre personalizado (a pedido del usuario, 2026-07-22)
+- El usuario preguntó qué tan posible era pasar de single-user a multiusuario (cada quien con sus propios datos). Respuesta corta: ya estaba prácticamente resuelto — todas las tablas tenían RLS por `auth.uid()` desde la Sesión 1 como buena práctica, así que activar multiusuario NO tocó ni migró ningún dato existente, solo se sumó lo que faltaba a nivel de experiencia
+- El usuario pidió explícitamente NO agregar ningún control de acceso (invitación, código, allowlist) porque el enlace de la app no se comparte públicamente — el registro (`Crear cuenta` en Login) queda abierto tal cual ya estaba
+- Se agregó pedir el **nombre** al crear la cuenta (campo "Nombre" en el formulario de registro, `Login.tsx`) — se guarda en el `user_metadata` de Supabase Auth (`display_name`), no en una tabla nueva, porque Supabase ya tiene ese espacio pensado para esto y evita RLS/sincronización extra
+- El saludo de Resumen pasó de "Hola," fijo a "Hola, {nombre}" cuando el usuario tiene nombre guardado (si no lo tiene, se ve igual que antes — no rompe la cuenta real ya existente del dueño)
+- Se agregó un campo "Tu nombre" en Ajustes (`Resumen.tsx`) para que cualquiera pueda poner o cambiar su nombre después de crear la cuenta — importante porque la cuenta actual del dueño (`ctaboadaa@gmail.com`) se creó antes de que existiera este campo y no tiene nombre guardado todavía; puede ponérselo ahí cuando quiera
+- `useAuth.tsx` ganó `updateDisplayName()` (usa `supabase.auth.updateUser`, actualiza el nombre al instante sin recargar la página)
+- Probado con datos reales: cuenta de prueba con nombre "Camila" desde el registro → saludo mostró "Hola, Camila" y solo sus propios datos (S/3,000, sin ver nada de otra cuenta) → cambiado el nombre a "Camila R." desde Ajustes → se actualizó al instante y persistió tras recargar. Formulario de registro con el campo "Nombre" verificado visualmente. Usuario y datos de prueba borrados al terminar.
+- ⚠️ Pendiente de que TÚ hagas (no yo): la próxima vez que entres, puedes ponerte tu nombre en Ajustes → "Tu nombre" para que el saludo se sienta personalizado también en tu cuenta.
 
 ## Próximas sesiones 📋
 - Con esto se cierran TODOS los pendientes de la revisión técnica del 2026-07-21. No hay tareas activas pendientes — a futuro, lo que el usuario pida.

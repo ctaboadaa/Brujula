@@ -7,6 +7,7 @@ import Owl from '../components/Owl'
 export default function Login() {
   const { signIn, signUp, requestPasswordReset } = useAuth()
   const [mode, setMode] = useState<'signIn' | 'signUp'>('signIn')
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -18,8 +19,12 @@ export default function Login() {
     e.preventDefault()
     setError(null)
     setInfo(null)
+    if (mode === 'signUp' && !name.trim()) {
+      setError('Escribe tu nombre.')
+      return
+    }
     setSubmitting(true)
-    const result = mode === 'signIn' ? await signIn(email, password) : await signUp(email, password)
+    const result = mode === 'signIn' ? await signIn(email, password) : await signUp(email, password, name)
     setSubmitting(false)
     if (result.error) {
       setError(result.error)
@@ -73,6 +78,27 @@ export default function Login() {
         </motion.div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {mode === 'signUp' && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: 0.05 }}
+            >
+              <label htmlFor="name" className="mb-1 block text-sm font-medium text-text-secondary">
+                Nombre
+              </label>
+              <input
+                id="name"
+                type="text"
+                required
+                autoComplete="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full rounded-control border border-border-default bg-surface-secondary px-3 py-2.5 text-text-primary outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
+              />
+            </motion.div>
+          )}
+
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { motion } from 'motion/react'
 import { Link } from 'react-router-dom'
 import { Gear, ArrowsLeftRight, Sun, Moon, DeviceMobile } from '@phosphor-icons/react'
@@ -22,7 +22,7 @@ import { formatCurrency, formatDate } from '../lib/format'
 import { highestMilestone } from '../lib/milestones'
 
 export default function Resumen() {
-  const { user, signOut } = useAuth()
+  const { user, signOut, updateDisplayName } = useAuth()
   const { preference, setPreference } = useTheme()
   const { assets, loading: loadingAssets } = useAssets()
   const { liabilities, loading: loadingLiabilities } = useLiabilities()
@@ -31,6 +31,10 @@ export default function Resumen() {
   const { categories } = useCategories()
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [celebratingMilestone, setCelebratingMilestone] = useState<number | null>(null)
+  const [nameInput, setNameInput] = useState('')
+  const [nameSubmitting, setNameSubmitting] = useState(false)
+
+  const displayName = (user?.user_metadata?.display_name as string | undefined)?.trim() || null
 
   const { snapshots, recordSnapshot } = useNetWorthHistory()
   const { celebratedMilestone, loading: loadingSettings, setCelebratedMilestoneValue } = useUserSettings()
@@ -67,6 +71,19 @@ export default function Resumen() {
     return categories.find((c) => c.id === id)?.name ?? 'Sin categoría'
   }
 
+  function openSettings() {
+    setNameInput(displayName ?? '')
+    setSettingsOpen(true)
+  }
+
+  async function handleSaveName(e: FormEvent) {
+    e.preventDefault()
+    if (!nameInput.trim()) return
+    setNameSubmitting(true)
+    await updateDisplayName(nameInput.trim())
+    setNameSubmitting(false)
+  }
+
   const loading = loadingAssets || loadingLiabilities || loadingTransactions
 
   return (
@@ -75,12 +92,12 @@ export default function Resumen() {
 
       <div className="mb-5 flex items-center justify-between">
         <div>
-          <p className="text-sm text-text-secondary">Hola,</p>
+          <p className="text-sm text-text-secondary">{displayName ? `Hola, ${displayName}` : 'Hola,'}</p>
           <h1 className="font-display text-2xl font-medium text-text-primary">tu rumbo financiero</h1>
         </div>
         <button
           type="button"
-          onClick={() => setSettingsOpen(true)}
+          onClick={openSettings}
           aria-label="Ajustes"
           className="flex h-10 w-10 items-center justify-center rounded-full border border-border-default bg-surface-elevated text-text-secondary"
         >
@@ -154,6 +171,29 @@ export default function Resumen() {
 
       <BottomSheet open={settingsOpen} onClose={() => setSettingsOpen(false)} title="Ajustes">
         <p className="mb-4 text-sm text-text-secondary">Sesión iniciada como {user?.email}</p>
+
+        <form onSubmit={handleSaveName} className="mb-6">
+          <label htmlFor="displayName" className="mb-1 block text-sm font-medium text-text-secondary">
+            Tu nombre
+          </label>
+          <div className="flex gap-2">
+            <input
+              id="displayName"
+              type="text"
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+              placeholder="¿Cómo te llamamos?"
+              className="w-full rounded-control border border-border-default bg-surface-secondary px-3 py-2.5 text-text-primary outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
+            />
+            <button
+              type="submit"
+              disabled={nameSubmitting || !nameInput.trim()}
+              className="shrink-0 rounded-control bg-brand-primary px-4 py-2.5 text-sm font-medium text-text-inverse disabled:opacity-50"
+            >
+              {nameSubmitting ? 'Guardando…' : 'Guardar'}
+            </button>
+          </div>
+        </form>
 
         <p className="mb-2 text-sm font-medium text-text-secondary">Apariencia</p>
         <div className="mb-6 flex gap-2">

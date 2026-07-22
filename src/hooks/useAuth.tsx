@@ -6,11 +6,12 @@ interface AuthContextValue {
   session: Session | null
   user: User | null
   loading: boolean
-  signUp: (email: string, password: string) => Promise<{ error: string | null }>
+  signUp: (email: string, password: string, displayName: string) => Promise<{ error: string | null }>
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
   requestPasswordReset: (email: string) => Promise<{ error: string | null }>
   updatePassword: (password: string) => Promise<{ error: string | null }>
+  updateDisplayName: (name: string) => Promise<{ error: string | null }>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -34,8 +35,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => listener.subscription.unsubscribe()
   }, [])
 
-  async function signUp(email: string, password: string) {
-    const { error } = await supabase.auth.signUp({ email, password })
+  async function signUp(email: string, password: string, displayName: string) {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { display_name: displayName.trim() } },
+    })
     if (error) return { error: GENERIC_ERROR }
     return { error: null }
   }
@@ -63,6 +68,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: null }
   }
 
+  async function updateDisplayName(name: string) {
+    const { error } = await supabase.auth.updateUser({ data: { display_name: name.trim() } })
+    if (error) return { error: GENERIC_ERROR }
+    return { error: null }
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -74,6 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signOut,
         requestPasswordReset,
         updatePassword,
+        updateDisplayName,
       }}
     >
       {children}
