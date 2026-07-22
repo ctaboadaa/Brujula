@@ -1,5 +1,5 @@
 # ESTADO — Brújula
-Última actualización: 2026-07-22 | 🎉 App publicada y funcionando en https://ctaboadaa.github.io/Brujula/
+Última actualización: 2026-07-22 (editar movimientos) | 🎉 App publicada y funcionando en https://ctaboadaa.github.io/Brujula/
 
 ## Qué es esta app (3 líneas máximo)
 Herramienta personal (NO se vende) para llevar el control de ingresos y gastos, ver el balance del patrimonio neto (activos - pasivos) y monitorear inversiones con precios de mercado automáticos. Desde 2026-07-22 soporta **multiusuario**: varias personas pueden crear su propia cuenta y cada una solo ve sus propios datos (sin control de acceso — el enlace no se comparte públicamente, así que no hace falta).
@@ -148,6 +148,12 @@ Los 11 hallazgos de la revisión quedaron resueltos en esta misma sesión (ver s
 - `useAuth.tsx` ganó `updateDisplayName()` (usa `supabase.auth.updateUser`, actualiza el nombre al instante sin recargar la página)
 - Probado con datos reales: cuenta de prueba con nombre "Camila" desde el registro → saludo mostró "Hola, Camila" y solo sus propios datos (S/3,000, sin ver nada de otra cuenta) → cambiado el nombre a "Camila R." desde Ajustes → se actualizó al instante y persistió tras recargar. Formulario de registro con el campo "Nombre" verificado visualmente. Usuario y datos de prueba borrados al terminar.
 - ⚠️ Pendiente de que TÚ hagas (no yo): la próxima vez que entres, puedes ponerte tu nombre en Ajustes → "Tu nombre" para que el saludo se sienta personalizado también en tu cuenta.
+
+## Editar movimientos (bug real reportado por el usuario, 2026-07-22)
+- El usuario editó/borró categorías de Gasto y quedó un movimiento sin categoría, pero no había forma de reasignarle una — Movimientos solo permitía crear o borrar, nunca editar (a diferencia de activos, inversiones y metas, que ya tenían su lápiz de editar desde antes)
+- Se agregó el mismo patrón: ícono de lápiz por movimiento, abre la misma hoja de "Registrar movimiento" pero precargada como "Editar movimiento" (tipo, monto, categoría, nota y fecha), usa `updateTransaction` (ya existía en el hook, solo no estaba conectado a ninguna pantalla)
+- Esto es justo lo que el usuario necesita para su caso: abrir el movimiento sin categoría y asignarle la correcta desde el desplegable
+- Probado con datos reales reproduciendo el escenario exacto: categoría borrada → movimiento quedó "Sin categoría" → editado desde la app y reasignado a otra categoría → confirmado en la base de datos que se actualizó el mismo registro (no se duplicó)
 
 ## Próximas sesiones 📋
 - Con esto se cierran TODOS los pendientes de la revisión técnica del 2026-07-21. No hay tareas activas pendientes — a futuro, lo que el usuario pida.

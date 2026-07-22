@@ -1,6 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { motion } from 'motion/react'
-import { Plus, ArrowsLeftRight, TrendUp, TrendDown, Trash, CaretLeft, CaretRight } from '@phosphor-icons/react'
+import { Plus, ArrowsLeftRight, TrendUp, TrendDown, Trash, PencilSimple, CaretLeft, CaretRight } from '@phosphor-icons/react'
 import { useTransactions } from '../hooks/useTransactions'
 import { useCategories } from '../hooks/useCategories'
 import BottomSheet from '../components/BottomSheet'
@@ -9,7 +9,7 @@ import BudgetOverview from '../components/BudgetOverview'
 import ExportCsv from '../components/ExportCsv'
 import CategoryManager from '../components/CategoryManager'
 import { formatCurrency, formatDate, formatMonthYear, todayIsoDate } from '../lib/format'
-import type { CategoryType } from '../lib/types'
+import type { CategoryType, Transaction } from '../lib/types'
 
 type Filter = 'all' | CategoryType
 const NO_CATEGORY = '__none__'
@@ -19,12 +19,13 @@ function monthKeyOf(date: Date) {
 }
 
 export default function Transacciones() {
-  const { transactions, loading, error, addTransaction, removeTransaction } = useTransactions()
+  const { transactions, loading, error, addTransaction, updateTransaction, removeTransaction } = useTransactions()
   const { categories, addCategory } = useCategories()
   const [filter, setFilter] = useState<Filter>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [monthOffset, setMonthOffset] = useState(0)
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
 
   const [type, setType] = useState<CategoryType>('expense')
   const [amount, setAmount] = useState('')
@@ -80,11 +81,26 @@ export default function Transacciones() {
   }, [filtered])
 
   function openSheet() {
+    setEditingId(null)
     setFormError(null)
+    setType('expense')
     setAmount('')
     setDescription('')
     setDate(todayIsoDate())
     setCategoryId('')
+    setNewCategoryName('')
+    setSheetOpen(true)
+  }
+
+  function openEdit(t: Transaction) {
+    setEditingId(t.id)
+    setFormError(null)
+    setType(t.type)
+    setAmount(String(t.amount))
+    setDescription(t.description ?? '')
+    setDate(t.date)
+    setCategoryId(t.category_id ?? '')
+    setNewCategoryName('')
     setSheetOpen(true)
   }
 
@@ -107,13 +123,14 @@ export default function Transacciones() {
       }
       finalCategoryId = result.id
     }
-    const result = await addTransaction({
+    const payload = {
       type,
       amount: parsedAmount,
       category_id: finalCategoryId,
       description: description.trim() || null,
       date,
-    })
+    }
+    const result = editingId ? await updateTransaction(editingId, payload) : await addTransaction(payload)
     setSubmitting(false)
     if (result.error) {
       setFormError(result.error)
@@ -270,6 +287,14 @@ export default function Transacciones() {
                     </span>
                     <button
                       type="button"
+                      onClick={() => openEdit(t)}
+                      aria-label="Editar movimiento"
+                      className="text-text-tertiary hover:text-brand-primary"
+                    >
+                      <PencilSimple size={16} />
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => removeTransaction(t.id)}
                       aria-label="Borrar movimiento"
                       className="text-text-tertiary hover:text-error"
@@ -284,7 +309,11 @@ export default function Transacciones() {
         ))}
       </div>
 
-      <BottomSheet open={sheetOpen} onClose={() => setSheetOpen(false)} title="Registrar movimiento">
+      <BottomSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        title={editingId ? 'Editar movimiento' : 'Registrar movimiento'}
+      >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex gap-2">
             {(['expense', 'income'] as CategoryType[]).map((t) => (
@@ -393,7 +422,7 @@ export default function Transacciones() {
             disabled={submitting}
             className="w-full rounded-control bg-brand-primary py-2.5 font-medium text-text-inverse disabled:opacity-50"
           >
-            {submitting ? 'Guardando…' : 'Guardar movimiento'}
+            {submitting ? 'Guardando…' : editingId ? 'Guardar cambios' : 'Guardar movimiento'}
           </motion.button>
         </form>
       </BottomSheet>
