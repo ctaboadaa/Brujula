@@ -1,5 +1,5 @@
 # ESTADO — Brújula
-Última actualización: 2026-07-22 (editar movimientos) | 🎉 App publicada y funcionando en https://ctaboadaa.github.io/Brujula/
+Última actualización: 2026-07-22 (presupuestos siguen el mes navegado) | 🎉 App publicada y funcionando en https://ctaboadaa.github.io/Brujula/
 
 ## Qué es esta app (3 líneas máximo)
 Herramienta personal (NO se vende) para llevar el control de ingresos y gastos, ver el balance del patrimonio neto (activos - pasivos) y monitorear inversiones con precios de mercado automáticos. Desde 2026-07-22 soporta **multiusuario**: varias personas pueden crear su propia cuenta y cada una solo ve sus propios datos (sin control de acceso — el enlace no se comparte públicamente, así que no hace falta).
@@ -154,6 +154,18 @@ Los 11 hallazgos de la revisión quedaron resueltos en esta misma sesión (ver s
 - Se agregó el mismo patrón: ícono de lápiz por movimiento, abre la misma hoja de "Registrar movimiento" pero precargada como "Editar movimiento" (tipo, monto, categoría, nota y fecha), usa `updateTransaction` (ya existía en el hook, solo no estaba conectado a ninguna pantalla)
 - Esto es justo lo que el usuario necesita para su caso: abrir el movimiento sin categoría y asignarle la correcta desde el desplegable
 - Probado con datos reales reproduciendo el escenario exacto: categoría borrada → movimiento quedó "Sin categoría" → editado desde la app y reasignado a otra categoría → confirmado en la base de datos que se actualizó el mismo registro (no se duplicó)
+
+## Consulta: tarjeta de crédito y doble conteo de gastos (2026-07-22, solo explicación, no se tocó código)
+- El usuario preguntó cómo evitar duplicar un gasto que paga con tarjeta de crédito y luego paga la tarjeta
+- Recomendación dada: registrar el gasto UNA vez, al momento de la compra (como ya lo hace). Al comprar con tarjeta, además subir a mano el saldo del Pasivo "Tarjeta de crédito" en Patrimonio por ese monto. Cuando llega el pago de la tarjeta, ESO no es un gasto nuevo — es solo mover plata: baja el Activo (cuenta bancaria) y baja el Pasivo (deuda de tarjeta) por el mismo monto, sin tocar Movimientos ni categorías
+- El usuario decidió dejarlo así (a mano, sin construir nada nuevo en la app). Si más adelante quiere un atajo tipo botón "Pagar tarjeta" en Pasivos, quedó ofrecido pero no solicitado
+
+## Presupuestos no seguían la navegación de mes en Movimientos (bug real reportado por el usuario, 2026-07-22)
+- El usuario notó que al cambiar de mes en Movimientos, la sección "Ingresos y gastos" sí cambiaba pero la card de Presupuestos se quedaba siempre en el mes real de hoy — inconsistencia, no una decisión deliberada
+- `BudgetOverview.tsx` calculaba su propio "mes actual" con `new Date()` en vez de recibir el mes que la pantalla está mostrando — se corrigió para que reciba `monthKey`/`monthLabel` como props desde `Transacciones.tsx` (el mismo mes que ya se usa para filtrar la lista y el nav de meses)
+- De paso: el título de la card ahora muestra el mes ("Presupuestos · Julio de 2026") para que quede claro a qué mes corresponde, y el aviso de límite superado se volvió neutral ("Superaste el límite mensual." en vez de "de este mes") ya que ahora puede referirse a un mes pasado
+- Nota: el LÍMITE del presupuesto (`monthly_budget` en categoría) sigue siendo un solo valor por categoría, no hay límites distintos por mes histórico — eso no cambió, solo se corrigió qué gasto se compara contra ese límite según el mes que se esté mirando
+- Probado con datos reales: categoría con límite S/100, gasto de S/30 en julio (dentro del límite) y S/150 en junio (excedido) → al navegar entre meses, la card cambia correctamente de "S/30.00 / S/100.00" sin aviso a "S/150.00 / S/100.00" con "Superaste el límite mensual." — confirmado en ambas direcciones (julio→junio→julio)
 
 ## Próximas sesiones 📋
 - Con esto se cierran TODOS los pendientes de la revisión técnica del 2026-07-21. No hay tareas activas pendientes — a futuro, lo que el usuario pida.

@@ -11,11 +11,6 @@ interface BudgetRow {
   spent: number
 }
 
-function currentMonthKey(): string {
-  const now = new Date()
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-}
-
 function barColor(pct: number): string {
   if (pct >= 100) return 'bg-error'
   if (pct >= 70) return 'bg-warning'
@@ -25,9 +20,13 @@ function barColor(pct: number): string {
 export default function BudgetOverview({
   categories,
   transactions,
+  monthKey,
+  monthLabel,
 }: {
   categories: Category[]
   transactions: Transaction[]
+  monthKey: string
+  monthLabel: string
 }) {
   const { setCategoryBudget } = useCategories()
   const [sheetOpen, setSheetOpen] = useState(false)
@@ -37,7 +36,6 @@ export default function BudgetOverview({
   const expenseCategories = useMemo(() => categories.filter((c) => c.type === 'expense'), [categories])
 
   const rows: BudgetRow[] = useMemo(() => {
-    const monthKey = currentMonthKey()
     return expenseCategories
       .filter((c) => c.monthly_budget !== null && c.monthly_budget > 0)
       .map((category) => {
@@ -47,7 +45,7 @@ export default function BudgetOverview({
         return { category, spent }
       })
       .sort((a, b) => b.spent / (b.category.monthly_budget ?? 1) - a.spent / (a.category.monthly_budget ?? 1))
-  }, [expenseCategories, transactions])
+  }, [expenseCategories, transactions, monthKey])
 
   function openSheet() {
     const initial: Record<string, string> = {}
@@ -77,7 +75,7 @@ export default function BudgetOverview({
       <div className="mb-3 flex items-center justify-between">
         <p className="flex items-center gap-1.5 text-xs uppercase tracking-wide text-text-tertiary">
           <Gauge size={14} />
-          Presupuestos del mes
+          Presupuestos · {monthLabel}
         </p>
         <button
           type="button"
@@ -113,7 +111,7 @@ export default function BudgetOverview({
                     className={`h-full rounded-full ${barColor(pct)}`}
                   />
                 </div>
-                {pct >= 100 && <p className="mt-1 text-xs text-error">Ya pasaste el límite de este mes.</p>}
+                {pct >= 100 && <p className="mt-1 text-xs text-error">Superaste el límite mensual.</p>}
               </li>
             )
           })}

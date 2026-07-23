@@ -221,7 +221,12 @@ export default function Transacciones() {
         )}
       </div>
 
-      <BudgetOverview categories={categories} transactions={transactions} />
+      <BudgetOverview
+        categories={categories}
+        transactions={transactions}
+        monthKey={monthKey}
+        monthLabel={formatMonthYear(selectedMonthDate)}
+      />
 
       {loading && <p className="py-8 text-center text-text-secondary">Cargando…</p>}
       {error && <p className="py-4 text-center text-error">{error}</p>}
